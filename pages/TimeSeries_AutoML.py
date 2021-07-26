@@ -71,7 +71,7 @@ def Stock_AutoML():
         model.fit(df[['Date', 'Close']].rename(columns={'Date':'ds', 'Close':'y'}))
     st.success('Model created')
     
-    if st.checkbox('Do you want to forecast?'):
+    if st.checkbox('Do you want to forecast the stock price?'):
         predict_days = st.slider('Select the number of days you want to predict',
                          min_value=7, max_value=max_predict_day)
         with st.spinner('Wait for model forecast'):
