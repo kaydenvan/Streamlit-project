@@ -9,6 +9,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 # st.set_option('deprecation.showPyplotGlobalUse', False)
+df = pd.read_csv(r'C:\Users\van_s\OneDrive - The Chinese University of Hong Kong\Training\Machine Learning\data\heart.csv')
 
 
 def _univariate_numeric(df, col):
@@ -32,9 +33,26 @@ def _univariate_object(df, col):
 
 def corr(df, correlation = .7):
     col = df.select_dtypes(include='number').columns
-    _ = df[col].corr().unstack().sort_values(ascending=False).drop_duplicates()
-    return pd.concat([_[_>correlation], _[_<correlation]])
+    _ = df[col].corr().unstack().sort_values(ascending=False).drop_duplicates().reset_index()
+    _ = _[_['level_0'] != _['level_1']]
+    return _[(_[0] >= correlation) | (_[0] <= -correlation)].reset_index(drop=True)
     
+def describe_corr(df):
+    if df.empty:
+        st.write('The columns are with low correlation between each other')
+    else:
+        for index, item in df.iterrows():
+            if item[0] > 0:
+                st.markdown(f"*{item['level_0'].title()}* has **positive** correlation({item[0]:.2f}) with *{item['level_1'].title()}*.")
+            elif item[0] < 0:
+                st.markdown(f"*{item['level_0'].title()}* has **negative** correlation({item[0]:.2f}) with *{item['level_1'].title()}*.")
+            else:
+                st.markdown(f"*{item['level_0'].title()}* has **no** relationship with *{item['level_1'].title()}*")
+
+def color_df(val):
+    color = 'green' if val > 0 else 'red'
+    return f'background-color: {color}'
+
 def plot_corr(df):
     fig, ax = plt.subplots(figsize=(16,12))
     sns.heatmap(df.select_dtypes(include='number').corr(),
@@ -43,6 +61,7 @@ def plot_corr(df):
 
 def exploratory_data_analysis():
     st.title('Exploratory Data Analysis')
+    st.write('This app is powered by Matplotlib and Seaborn')
     st.write('This page aims to allow auto EDA process')
     uploaded_file = st.file_uploader('Please upload your dataset', type=['csv', 'xlsx', 'xls'])
     if uploaded_file is not None:
@@ -96,6 +115,12 @@ def exploratory_data_analysis():
 
     # show data correlation
     if st.checkbox('Show data correlation'):
-        st.dataframe(corr(df))
-        st.write('Correlation chart for all variables within the dataset')
-        plot_corr(df)
+        corr_factor = .7
+        corr_factor = st.slider('Show variables with +-{0} correlation'.format(corr_factor), 
+                                min_value=0., max_value=1., value=corr_factor)
+        corr_df = corr(df, corr_factor)
+        st.dataframe(corr_df.style.applymap(color_df, subset=[0]))
+        # describe_corr(corr_df)
+        st.markdown('**Correlation chart for all variables within the dataset**')
+        with st.spinner('Rendering in process'):
+            plot_corr(df)

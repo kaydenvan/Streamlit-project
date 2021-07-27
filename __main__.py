@@ -7,7 +7,7 @@ Created on Sat Jul 24 01:14:50 2021
 
 from func.multipage import MultiPage
 from pages.main import main
-from pages.TimeSeries_AutoML import Stock_AutoML
+from pages.timeseries_automl import stock_automl
 from pages.exploratory_data_analysis import exploratory_data_analysis
 from pages.categorical_automl import categorical_automl
 
@@ -17,7 +17,7 @@ app = MultiPage()
 # add pages
 app.add_page("Main Page", main)
 app.add_page('Exploratory Data Analysis', exploratory_data_analysis)
-app.add_page('Stock AutoML', Stock_AutoML)
+app.add_page('Stock AutoML', stock_automl)
 app.add_page('Categorical AutoML', categorical_automl)
 
 # init instance

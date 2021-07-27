@@ -8,3 +8,5 @@ xgboost
 catboost
 lightgbm
 seaborn
+fbprophet
+openpyxl

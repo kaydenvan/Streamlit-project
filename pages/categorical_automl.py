@@ -7,7 +7,6 @@ Created on Mon Jul 26 09:21:34 2021
 import streamlit as st
 import pandas as pd
 import numpy as np 
-import sys
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.preprocessing import OrdinalEncoder, LabelEncoder, MinMaxScaler
 from sklearn.impute import SimpleImputer
@@ -17,17 +16,25 @@ from xgboost import XGBClassifier
 from catboost import CatBoostClassifier
 from lightgbm import LGBMClassifier
 from sklearn.metrics import accuracy_score, recall_score, precision_score
-from sklearn.metrics import classification_report, plot_confusion_matrix
-
-# sys.path.append(r'C:\Users\van_s\Desktop\streamlit_project\func')
+from sklearn.metrics import classification_report\
+    # , plot_confusion_matrix
 from func.download_file import download
+import warnings
+warnings.filterwarnings('ignore')
 
 def change_col_name(df):
+    """
+    Purpose: this function aims to convert the columns name into small letters.
+
+    """
     cols_name = [x.lower() for x in df.columns]
     df.columns = cols_name
     return df
 
 def automl(algo, x_train, x_test, y_train, y_test):
+    """ 
+    Purpose: Taking the classification algorithm to create model and get performance report.
+    """
     model = algo.fit(x_train, y_train)
     y_pred = model.predict(x_test)
     train_acc = model.score(x_train, y_train)
@@ -43,15 +50,18 @@ def automl(algo, x_train, x_test, y_train, y_test):
     return model
 
 def download_pred_df(df, features, target, model):
+    """
+    Purpose: create a link to download result file
+    """
     df['y_pred'] = model.predict(df[features])
     df['accr'] = np.where(df[target] == df['y_pred'], True, False)
     df = df[[target] + ['y_pred', 'accr'] + features]
     download(df)
 
-
 def categorical_automl():
     # main
     st.title('Auto Categorical ML')
+    st.write('This app is powered by Streamlit, Sklearn, XGBoost, CatBoost and LightGBM')
     uploaded_file = st.file_uploader('Please upload your dataset', type=['csv', 'xlsx', 'xls'])
     if uploaded_file is not None:
         file_details = {"FileName":uploaded_file.name,"FileType":uploaded_file.type,"FileSize":uploaded_file.size}
@@ -170,10 +180,6 @@ def categorical_automl():
                 download_pred_df(df, features, target, model)
 
 
-
-
-
-    
 # fig, ax = plt.subplots(figsize=(4,4))
 # plot_confusion_matrix(model, x_test, y_test, display_labels=model.classes_,
 #                      normalize='true', cmap=plt.cm.Blues, ax=ax)

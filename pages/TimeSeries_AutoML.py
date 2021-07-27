@@ -15,7 +15,7 @@ warnings.filterwarnings('ignore')
 pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 100)
 
-def Stock_AutoML():
+def stock_automl():
     st.title('Time Series AutoML')
     st.write('This app is powered by Streamlit, Yahoo Finance and FbProphet')
     stock_symbol = st.text_input('Please input stock symbol', '').strip()
@@ -90,8 +90,10 @@ def Stock_AutoML():
             st.write(fig)
             
             # summary
-            changes = (forecast_plot_df.iloc[-1] - forecast_plot_df.iloc[0])/forecast_plot_df.iloc[0]
-            st.write(f'Quick Summary: With {predict_days} days prediction, {stock_symbol} is expected to have {changes[0]*100:.2f}% changes.')
+            changes = ((forecast_plot_df.iloc[-1] - forecast_plot_df.iloc[0])/forecast_plot_df.iloc[0])[0]
+            color = 'green' if changes > 0 else 'black' if changes == 0 else 'red'
+            st.markdown(f"<font color='{color}'>**Quick Summary**: With {predict_days} days prediction, {stock_symbol} is expected to have {changes*100:.2f}% changes.</font>", 
+                        unsafe_allow_html=True)
             
     st.title('Further information')
     # optional graph
