@@ -10,3 +10,4 @@ lightgbm
 seaborn
 fbprophet
 openpyxl
+pystan

@@ -71,7 +71,9 @@ def stock_automl():
         model.fit(df[['Date', 'Close']].rename(columns={'Date':'ds', 'Close':'y'}))
     st.success('Model created')
     
-    if st.checkbox('Do you want to forecast the stock price?'):
+    check_forecast = st.checkbox('Do you want to forecast the stock price?')
+    
+    if check_forecast:
         predict_days = st.slider('Select the number of days you want to predict',
                          min_value=7, max_value=max_predict_day)
         with st.spinner('Wait for model forecast'):
@@ -95,13 +97,13 @@ def stock_automl():
             st.markdown(f"<font color='{color}'>**Quick Summary**: With {predict_days} days prediction, {stock_symbol} is expected to have {changes*100:.2f}% changes.</font>", 
                         unsafe_allow_html=True)
             
-    st.title('Further information')
-    # optional graph
-    if st.checkbox('Show prediction dataframe'):
-        st.dataframe(forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(predict_days))
-    if st.checkbox('Show components in the Time Series Model'):
+        # optional graph
+        optionals = st.beta_expander("Optional Functions", False)
+        optionals.markdown('**Prediction dataframe**')
+        optionals.dataframe(forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(predict_days))
+        optionals.markdown('**Model components**')
         fig = model.plot_components(forecast[:-(max_predict_day-predict_days)])
-        st.write(fig)
+        optionals.write(fig)
 
 
 
