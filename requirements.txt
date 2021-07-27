@@ -3,11 +3,7 @@ pandas
 yfinance
 matplotlib
 plotly
-warnings
-sys
 sklearn
 xgboost
 catboost
 lightgbm
-base64
-io
