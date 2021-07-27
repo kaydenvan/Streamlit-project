@@ -19,10 +19,8 @@ from lightgbm import LGBMClassifier
 from sklearn.metrics import accuracy_score, recall_score, precision_score
 from sklearn.metrics import classification_report, plot_confusion_matrix
 
-sys.path.append(r'C:\Users\van_s\Desktop\streamlit_project\func')
-from download_file import download
-
-# df = pd.read_csv(r'C:\Users\van_s\OneDrive - The Chinese University of Hong Kong\Training\Machine Learning\data\BankChurners.csv')
+# sys.path.append(r'C:\Users\van_s\Desktop\streamlit_project\func')
+from .download_file import download
 
 def change_col_name(df):
     cols_name = [x.lower() for x in df.columns]

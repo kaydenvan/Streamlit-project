@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 # st.set_option('deprecation.showPyplotGlobalUse', False)
 
-# df = pd.read_excel(r'C:\Users\van_s\Desktop\Millennium\Sample Dataset.xlsx')
 
 def _univariate_numeric(df, col):
     df[col] = df[col].astype(float)
