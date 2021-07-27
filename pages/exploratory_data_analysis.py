@@ -9,8 +9,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 # st.set_option('deprecation.showPyplotGlobalUse', False)
-df = pd.read_csv(r'C:\Users\van_s\OneDrive - The Chinese University of Hong Kong\Training\Machine Learning\data\heart.csv')
-
 
 def _univariate_numeric(df, col):
     df[col] = df[col].astype(float)
