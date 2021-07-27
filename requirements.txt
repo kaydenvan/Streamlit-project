@@ -8,6 +8,6 @@ xgboost
 catboost
 lightgbm
 seaborn
-pystan
+pystan<3
 fbprophet
 openpyxl
