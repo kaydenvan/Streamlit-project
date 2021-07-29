@@ -59,8 +59,7 @@ def plot_corr(df):
 
 def exploratory_data_analysis():
     st.title('Exploratory Data Analysis')
-    st.write('This app is powered by Matplotlib and Seaborn')
-    st.write('This page aims to allow auto EDA process')
+    st.write('This app is powered by Matplotlib and Seaborn and aims to allow auto EDA process')
     uploaded_file = st.file_uploader('Please upload your dataset', type=['csv', 'xlsx', 'xls'])
     if uploaded_file is not None:
         file_details = {"FileName":uploaded_file.name,"FileType":uploaded_file.type,"FileSize":uploaded_file.size}

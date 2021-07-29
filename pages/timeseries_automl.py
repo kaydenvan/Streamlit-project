@@ -16,7 +16,7 @@ pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 100)
 
 def stock_automl():
-    st.title('Time Series AutoML')
+    st.title('Stock Performance AutoML')
     st.write('This app is powered by Streamlit, Yahoo Finance and FbProphet')
     stock_symbol = st.text_input('Please input stock symbol', '').strip()
     if len(stock_symbol.strip()) != 0:
