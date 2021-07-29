@@ -116,8 +116,9 @@ def exploratory_data_analysis():
         corr_factor = st.slider('Show variables with +-{0} correlation'.format(corr_factor), 
                                 min_value=0., max_value=1., value=corr_factor)
         corr_df = corr(df, corr_factor)
-        st.dataframe(corr_df.style.applymap(color_df, subset=[0]))
+        st.dataframe(corr_df)
+        # st.dataframe(corr_df.style.applymap(color_df, subset=[0]))
         # describe_corr(corr_df)
         st.markdown('**Correlation chart for all variables within the dataset**')
-        with st.spinner('Rendering in process'):
-            plot_corr(df)
+        # with st.spinner('Rendering in process'):
+        #     plot_corr(df)
