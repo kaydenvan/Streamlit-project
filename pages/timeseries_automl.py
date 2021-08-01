@@ -15,9 +15,31 @@ warnings.filterwarnings('ignore')
 pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 100)
 
+@st.cache
+def prophet_model(df, date, target, **kwargs):
+    from fbprophet import Prophet
+    daily_seasonality = kwargs.get('daily_seasonality', True)
+    model = Prophet(daily_seasonality=daily_seasonality)
+    model.fit(df[[date, target]].rename(columns={date:'ds', target:'y'}))
+    return model
+
+@st.cache
+def forecast_model(model, period, **kwargs):
+    freq = kwargs.get('freq', 'D')
+    future = model.make_future_dataframe(period, freq=freq)
+    forecast = model.predict(future)
+    return forecast
+
+# @st.cache
+# def get_stock_info(stock_symbol, **kwargs):
+#     period = kwargs.get('period', '3y')
+#     return yf.Ticker(stock_symbol).history(period)
+
 def stock_automl():
     st.title('Stock Performance AutoML')
     st.write('This app is powered by Streamlit, Yahoo Finance and FbProphet')
+    st.markdown("""With the limited resource on streamlit free tier, 
+                it is developed with purpose that the low accuracy on the time series prediction.""")
     stock_symbol = st.text_input('Please input stock symbol', '').strip()
     if len(stock_symbol.strip()) != 0:
         df = yf.Ticker(stock_symbol).history(period='10y')
@@ -28,10 +50,7 @@ def stock_automl():
         else:
             st.write(f'{stock_symbol.upper()} historical record is retriving')
             st.write(f'Stock record from {min(df.Date).date()} to {max(df.Date).date()}')
-    # elif stock_symbol == ' ':
-    #     st.stop()
     else: 
-    #     st.error('Empty stock symbol')
         st.stop()
     
     # create selection button
@@ -61,15 +80,13 @@ def stock_automl():
     
     st.title('Data Modeling')
     #data modeling
-    from fbprophet import Prophet
+    # from fbprophet import Prophet
+    # model = Prophet(daily_seasonality=True)
     max_predict_day = 60
-    # feature_list = ['Open', 'High', 'Low', 'Adj Close', 'Volume']
-    model = Prophet(daily_seasonality=True)
-    # for feature in feature_list:
-    #     model.add_regressor(feature)
-    with st.spinner('Wait for model development'):
-        model.fit(df[['Date', 'Close']].rename(columns={'Date':'ds', 'Close':'y'}))
-    st.success('Model created')
+
+    with st.spinner('model develop in progress'):
+        model = prophet_model(df, 'Date', 'Close', daily_seasonality=True)
+        st.success('Model created')
     
     check_forecast = st.checkbox('Do you want to forecast the stock price?')
     
@@ -77,9 +94,7 @@ def stock_automl():
         predict_days = st.slider('Select the number of days you want to predict',
                          min_value=7, max_value=max_predict_day)
         with st.spinner('Wait for model forecast'):
-            future = model.make_future_dataframe(max_predict_day, freq='D')
-            #future = pd.DataFrame(pd.bdate_range(start=max(df.Date), periods=60, freq='D'), columns=['ds'])
-            forecast = model.predict(future)
+            forecast = forecast_model(model, max_predict_day, freq='D')
             
             # plot graph
             fig, ax = plt.subplots()
