@@ -8,6 +8,7 @@ import streamlit as st
 
 def main():
     st.title('Main Page')
+    st.markdown("""last update date: 1st Aug 2021""")
     st.title("Message for 29 July 2021")
     st.markdown("""
                 ***Dear Tom and Shudan,***\n
