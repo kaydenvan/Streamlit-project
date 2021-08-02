@@ -17,6 +17,19 @@ st.set_page_config(
     layout="centered",
     initial_sidebar_state="auto")
 
+
+@st.cache(allow_output_mutation=True)
+def Pageviews():
+    return []
+
+pageviews=Pageviews()
+pageviews.append('dummy')
+
+try:
+    print('Page viewed = {} times.'.format(len(pageviews)))
+except ValueError:
+    print('Page viewed = {} times.'.format(1))
+    
 # create instance
 app = MultiPage()
 
