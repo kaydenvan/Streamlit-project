@@ -30,7 +30,7 @@ def forecast_model(model, period, **kwargs):
     forecast = model.predict(future)
     return forecast
 
-# @st.cache
+# @st.cache(allow_output_mutation=True)
 # def get_stock_info(stock_symbol, **kwargs):
 #     period = kwargs.get('period', '3y')
 #     return yf.Ticker(stock_symbol).history(period)
@@ -40,9 +40,11 @@ def stock_automl():
     st.write('This app is powered by Streamlit, Yahoo Finance and FbProphet')
     st.markdown("""With the limited resource on streamlit free tier, 
                 it is developed with purpose that the low accuracy on the time series prediction.""")
+    st.markdown("This app currently supports US stock only.")
     stock_symbol = st.text_input('Please input stock symbol', '').strip()
     if len(stock_symbol.strip()) != 0:
         df = yf.Ticker(stock_symbol).history(period='10y')
+        # df = get_stock_info(stock_symbol, period='10y')
         df.reset_index(inplace=True, drop=False)
         if df.empty:
             st.error('stock symbol is invalid')  

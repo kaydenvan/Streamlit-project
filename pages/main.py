@@ -6,11 +6,9 @@ Created on Sat Jul 24 01:00:03 2021
 """
 import streamlit as st
 
-def main():
-    st.title('Main Page')
-    st.markdown("""last update date: 1st Aug 2021""")
-    st.title("Message for 29 July 2021")
-    st.markdown("""
+def display_massage(bucket=st):
+    bucket.subheader("Message on 29 July 2021")
+    bucket.markdown("""
                 ***Dear Tom and Shudan,***\n
                 Thank you your time for the interview today.\n
                 This is the page that I would like to show today but have no luck to share the screen.
@@ -23,12 +21,18 @@ def main():
                 Best Regards,\n
                 *Kayden Van*
                 """)
-    st.write()  
+    bucket.write()  
     
-    st.markdown("""Description:\n
-                This webstie is created for demonstration purpose by Kayden Van.\n
-                If you see any bugs/errors, feel free to contact me for more enhancement.\n
-                You may click the app navigation bar to select different functions
+
+def main():
+    st.title('Main Page')
+    msg = st.beta_expander('Message', expanded=True)
+    display_massage(msg)
+    
+    st.markdown("Description:")
+    st.markdown("""This webstie is created for demonstration purpose by *Kayden Van*.
+                If you see any bugs/errors, feel free to contact me for more enhancement.
+                Besides, you may click the app navigation bar to select different functions.
                 """)
     st.write()
     st.markdown("""**Current/Aimed Functions available**:<br>

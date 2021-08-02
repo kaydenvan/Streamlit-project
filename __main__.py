@@ -4,12 +4,18 @@ Created on Sat Jul 24 01:14:50 2021
 
 @author: van_s
 """
-# import streamlit as st
+import streamlit as st
 from func.multipage import MultiPage
 from pages.main import main
 from pages.timeseries_automl import stock_automl
 from pages.exploratory_data_analysis import exploratory_data_analysis
 from pages.categorical_automl import categorical_automl
+from pages.version import update
+
+st.set_page_config(
+    page_title="Home page",
+    layout="centered",
+    initial_sidebar_state="auto")
 
 # create instance
 app = MultiPage()
@@ -24,12 +30,12 @@ app = MultiPage()
 #     unlock = False
 
 # add pages
-app.add_page("Main Page", main)
-app.add_page('Exploratory Data Analysis', exploratory_data_analysis)
+app.add_page("Home Page", main)
+app.add_page('1. Exploratory Data Analysis', exploratory_data_analysis)
 # if unlock == True:
-app.add_page('Stock AutoML', stock_automl)
-app.add_page('Categorical AutoML', categorical_automl)
-
+app.add_page('2. Categorical AutoML', categorical_automl)
+app.add_page('3. Stock AutoML', stock_automl)
+app.add_page('Reference: version', update)
 
 # init instance
 app.run()

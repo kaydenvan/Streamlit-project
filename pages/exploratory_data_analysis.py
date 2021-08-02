@@ -9,11 +9,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-st.set_page_config(
-    page_title="Exploratory Data Analysis",
-    layout="centered",
-    initial_sidebar_state="auto")
-
 @st.cache
 def iris_dataset():
     from sklearn.datasets import load_iris
