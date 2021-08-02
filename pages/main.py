@@ -23,6 +23,9 @@ def display_massage(bucket=st):
                 """)
     bucket.write()  
     
+@st.cache(allow_output_mutation=True)
+def Pageviews():
+    return []
 
 def main():
     st.title('Main Page')
@@ -49,6 +52,17 @@ def main():
                 6. Sentiment Analysis (Not Yet Developed)
                 7. Image Classification (Not Yet Developed)
                 """, unsafe_allow_html=True)
+    
+    # count page views
+    pageviews=Pageviews()
+    pageviews.append('dummy')
+    
+    try:
+        view = '<p style="text-align: right; font-size: 8px;">Total page viewed = {} times.</p>'.format(len(pageviews))
+    except ValueError:
+        view = '<p style="text-align: right; font-size: 8px;">Page viewed = {} times</p>.'.format(1)
+    
+    st.write(view, unsafe_allow_html=True)
     # st.markdown("""You may aware that some of the functions are locked. 
     #             If you are interested on it, please contact Kayden for the information""")
     
