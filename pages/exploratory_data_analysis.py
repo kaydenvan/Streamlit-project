@@ -8,6 +8,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from func.upload_file import upload_file
 
 @st.cache
 def iris_dataset():
@@ -73,35 +74,25 @@ def exploratory_data_analysis():
                 If you would like to see the demo, please check on the demo button.""")
     st.markdown("""*Remark: for simplicity, it is now not supported for configurating to specify the row number of column header.
                 Let me know if it is an important feature if necessary.*""")
-    uploaded = False
     df = pd.DataFrame()
     col1, col2 = st.beta_columns((3, 1))
     
     with col1:
-        uploaded_file = st.file_uploader('Please upload your dataset', type=['csv', 'xlsx', 'xls'])
-        if uploaded_file is not None:
-            file_details = {"FileName":uploaded_file.name,"FileType":uploaded_file.type,"FileSize":uploaded_file.size}
-            st.write(file_details)
-            uploaded = True
+        df, uploaded = upload_file(file_type = ['csv', 'xlsx', 'xls'], show_file_info = True)
     
     with col2: 
         if not uploaded:
             if st.checkbox('demo', help='Iris data will be used if you check this option'):
                 df = iris_dataset()
-     
-    # preview uploaded dataframe
-    if uploaded:
-        if uploaded_file.name.split('.')[-1] in ['xlsx', 'xls']:
-            df = pd.read_excel(uploaded_file)
-        elif uploaded_file.name.split('.')[-1]  == 'csv':
-            df = pd.read_csv(uploaded_file)
     
     # if dataframe is empty, stop program
     if df.empty:
         st.stop()
     
-    st.subheader('Preview uploaded dataframe') if uploaded else st.subheader('Preview demo dataframe')
-    st.dataframe(df.head())
+    preview_df = st.checkbox('Preview dataframe')
+    if preview_df:
+        st.subheader('Preview uploaded dataframe') if uploaded else st.subheader('Preview demo dataframe')
+        st.dataframe(df.head())
             
     rows, cols_no = df.shape[0], df.shape[1]
     cols = ', '.join(df.columns)
@@ -111,7 +102,7 @@ def exploratory_data_analysis():
     
     # generate highlevel description
     st.subheader('Summary of the dataframe')
-    st.dataframe(df.describe(include=['number', 'object']))
+    st.dataframe(df.describe())
 
     # see if any null field
     st.subheader('Number of null field in each column')

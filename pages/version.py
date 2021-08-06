@@ -8,12 +8,22 @@ import streamlit as st
 
 def update():
     st.markdown("""
-                3rd Aug 2021\n
+                *6th Aug 2021*\n
+                1. Disable download function
+                2. Customer Auto Segmentation beta 0.1
+                """)
+    st.markdown("""
+                *5th Aug 2021*\n
+                1. Change upload file to function to increase usability
+                2. Change the upload in categorical automl and eda
+                """)
+    st.markdown("""
+                *3rd Aug 2021*\n
                 1. Roll off total view count due to network issue
                 2. hide message box
                 """)
     st.markdown("""
-                2nd Aug 2021\n
+                *2nd Aug 2021*\n
                 1. Update on message box on main page
                 2. Update page name
                 3. Add reminder for stock auto machine learning

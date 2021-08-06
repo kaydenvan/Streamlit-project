@@ -19,6 +19,7 @@ from sklearn.metrics import accuracy_score, recall_score, precision_score
 from sklearn.metrics import classification_report\
     # , plot_confusion_matrix
 from func.download_file import download
+from func.upload_file import upload_file
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -62,22 +63,13 @@ def categorical_automl():
     # main
     st.title('Auto Categorical ML')
     st.write('This app is powered by Streamlit, Sklearn, XGBoost, CatBoost and LightGBM')
-    uploaded_file = st.file_uploader('Please upload your dataset', type=['csv', 'xlsx', 'xls'])
-    if uploaded_file is not None:
-        file_details = {"FileName":uploaded_file.name,"FileType":uploaded_file.type,"FileSize":uploaded_file.size}
-        st.write(file_details)
-    else:
+    df, uploaded = upload_file(file_type = ['csv', 'xlsx', 'xls'], show_file_info = True)
+    if not uploaded:
         st.stop()
         
-    # read file
-    st.write('Preview uploaded dataframe')
-    if uploaded_file.name.split('.')[-1] in ['xlsx', 'xls']:
-        df = pd.read_excel(uploaded_file)
-        df = change_col_name(df)
-        st.dataframe(df.head())
-    elif uploaded_file.name.split('.')[-1]  == 'csv':
-        df = pd.read_csv(uploaded_file)
-        df = change_col_name(df)
+    preview_df = st.checkbox('Preview dataframe')
+    if preview_df:
+        st.subheader('Preview uploaded dataframe') if uploaded else st.subheader('Preview demo dataframe')
         st.dataframe(df.head())
     
     st.write('If you would like to do EDA for the dataset, please reach to the EDA page accordingly')
@@ -152,32 +144,32 @@ def categorical_automl():
         with st.spinner('Model development in progress'):
             tree = RandomForestClassifier(random_state=1)
             model = automl(tree, x_train, x_test, y_train, y_test)
-            if st.checkbox('Do you want to donwload the result?'):
-                download_pred_df(df, features, target, model)
+            # if st.checkbox('Do you want to donwload the result?'):
+            #     download_pred_df(df, features, target, model)
     if 'XGBoost' in options:
         with st.spinner('Model development in progress'):
             xgb = XGBClassifier()
             model = automl(xgb, x_train, x_test, y_train, y_test)
-            if st.checkbox('Do you want to donwload the result?'):
-                download_pred_df(df, features, target, model)
+            # if st.checkbox('Do you want to donwload the result?'):
+            #     download_pred_df(df, features, target, model)
     if 'CatBoost' in options:
         with st.spinner('Model development in progress'):
             cat = CatBoostClassifier(random_seed=1, verbose=0)
             model = automl(cat, x_train, x_test, y_train, y_test)
-            if st.checkbox('Do you want to donwload the result?'):
-                download_pred_df(df, features, target, model)
+            # if st.checkbox('Do you want to donwload the result?'):
+            #     download_pred_df(df, features, target, model)
     if 'LightGBM' in options:
         with st.spinner('Model development in progress'):
             lgb = LGBMClassifier()
             model = automl(lgb, x_train, x_test, y_train, y_test)
-            if st.checkbox('Do you want to donwload the result?'):
-                download_pred_df(df, features, target, model)
+            # if st.checkbox('Do you want to donwload the result?'):
+            #     download_pred_df(df, features, target, model)
     if 'Logistic Regression' in options:
         with st.spinner('Model development in progress'):
             logit = LogisticRegression(random_state=1)
             model = automl(logit, x_train, x_test, y_train, y_test)
-            if st.checkbox('Do you want to donwload the result?'):
-                download_pred_df(df, features, target, model)
+            # if st.checkbox('Do you want to donwload the result?'):
+            #     download_pred_df(df, features, target, model)
 
 
 # fig, ax = plt.subplots(figsize=(4,4))
