@@ -8,6 +8,11 @@ import streamlit as st
 
 def update():
     st.markdown("""
+                *8th Aug 2021*\n
+                1. Update demo function in EDA
+                2. Add demo function in categorical automl
+                """)
+    st.markdown("""
                 *6th Aug 2021*\n
                 1. Disable download function
                 2. Customer Auto Segmentation beta 0.1

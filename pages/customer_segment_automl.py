@@ -58,8 +58,7 @@ def computer_kmeans(df, clusters, **kwargs):
     for cluster in range(2, clusters+1):
         kmeans = KMeans(n_clusters=cluster, init='k-means++', random_state=1)
         kmeans.fit(df)
-        if elbow:
-            sse.append(kmeans.inertia_)
+        sse.append(kmeans.inertia_)
         if silouette_score:
             sil.append(silhouette_score(df, kmeans.labels_, metric='euclidean'))
     
@@ -72,6 +71,8 @@ def computer_kmeans(df, clusters, **kwargs):
     
     kmeans = KMeans(n_clusters=optimal_k).fit(df)
     labels = kmeans.labels_
+    if not elbow:
+        sse =[]
     return optimal_k, labels, kmeans, sse, sil
      
 def computer_dbscan(df, **kwargs):
@@ -90,11 +91,36 @@ def computer_dbscan(df, **kwargs):
     n_noise_ = dbs.labels_[dbs.labels_ == -1].size
     return optimal_k, labels, dbs, n_noise_
 
+def plot_dbscan(df, model):
+    fig, ax = plt.subplots()
+    unique_labels = set(model.labels_)
+    colors = [plt.cm.Spectral(each)
+              for each in np.linspace(0, 1, len(unique_labels))]
+    for k, col in zip(unique_labels, colors):
+        if k == -1:
+            # Black used for noise.
+            col = [0, 0, 0, 1]
+    
+        class_member_mask = (model.labels_ == k)
+        
+        core_samples_mask = np.zeros_like(model.labels_, dtype=bool)
+        core_samples_mask[model.core_sample_indices_] = True
+        
+        xy = df[class_member_mask & core_samples_mask]
+        plt.plot(xy.iloc[:, 0], xy.iloc[:, 1], 'o', markerfacecolor=tuple(col),
+                 markeredgecolor='k', markersize=14)
+    
+        xy = df[class_member_mask & ~core_samples_mask]
+        plt.plot(xy.iloc[:, 0], xy.iloc[:, 1], 'o', markerfacecolor=tuple(col),
+                 markeredgecolor='k', markersize=6)
+    return fig
+
 def download_pred_df(df):
     """
     Purpose: create a link to download result file
     """
-    download(df)
+    st.markdown('**disable download function at the moment**')
+    # download(df)
 
 def customer_autosegment():
     st.title('Auto Customer Segmentation')
@@ -147,12 +173,14 @@ def customer_autosegment():
     model_option = st.radio('Choose the methodology to cluster the data', ('KMeans', 'DBSCAN'))
     
     if model_option == 'KMeans':
-        optimal_k, df['y_pred'], model, sse, sil = computer_kmeans(df, clusters, elbow=True, silouette_score=True)
-        st.markdown('**disable download function at the moment**')
-        # download(df)
+        elbow_ = st.sidebar.checkbox('Elbow Method', help='Check it if you want to show Elbow Chart')
+        silouette_score_ = st.sidebar.checkbox('Silhouette Coefficients', help='Check it if you want to show Silhouette Coefficients')        
+        
+        optimal_k, df['y_pred'], model, sse, sil = computer_kmeans(df, clusters, elbow=elbow_, silouette_score=silouette_score_)
+        download_pred_df(df)
         
         # plot Elbow Method
-        if len(sse) > 0:
+        if elbow_:
             fig, ax = plt.subplots()
             ax = plt.plot(range(2, clusters+1), sse)
             plt.title('Elbow Method')
@@ -161,7 +189,7 @@ def customer_autosegment():
             st.write(fig)
         
         # plot Silhouette Coefficient
-        if len(sil) >0:
+        if silouette_score_:
             fig, ax = plt.subplots()
             ax = plt.plot(range(2, clusters+1), sil)
             plt.title('Silhouette Coefficients')
@@ -170,30 +198,12 @@ def customer_autosegment():
             st.write(fig)
     
     elif model_option == 'DBSCAN':
-        opitmal_k, df['y_pred'], model, n_noise_ = computer_dbscan(df, eps=.5, min_samples=5)
-        st.markdown('**disable download function at the moment**')
+        eps_ = st.sidebar.slider('ε(eps)', min_value=.01, max_value=1., value=.5)
+        min_samples_ = st.sidebar.number_input('Min sample', min_value=1, value=5, step=1)
         
-        fig, ax = plt.subplots()
-        unique_labels = set(df['y_pred'])
-        colors = [plt.cm.Spectral(each)
-                  for each in np.linspace(0, 1, len(unique_labels))]
-        for k, col in zip(unique_labels, colors):
-            if k == -1:
-                # Black used for noise.
-                col = [0, 0, 0, 1]
+        opitmal_k, df['y_pred'], model, n_noise_ = computer_dbscan(df, eps=eps_, min_samples=min_samples_)
+        download_pred_df(df)
         
-            class_member_mask = (model.labels_ == k)
-            
-            core_samples_mask = np.zeros_like(model.labels_, dtype=bool)
-            core_samples_mask[model.core_sample_indices_] = True
-            
-            xy = df[class_member_mask & core_samples_mask]
-            plt.plot(xy.iloc[:, 0], xy.iloc[:, 1], 'o', markerfacecolor=tuple(col),
-                     markeredgecolor='k', markersize=14)
-        
-            xy = df[class_member_mask & ~core_samples_mask]
-            plt.plot(xy.iloc[:, 0], xy.iloc[:, 1], 'o', markerfacecolor=tuple(col),
-                     markeredgecolor='k', markersize=6)
-        
+        fig = plot_dbscan(df, model)
         plt.title('Estimated number of clusters: %d' % opitmal_k)
         st.write(fig)

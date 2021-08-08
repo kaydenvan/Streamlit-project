@@ -23,6 +23,14 @@ from func.upload_file import upload_file
 import warnings
 warnings.filterwarnings('ignore')
 
+def iris_dataset():
+    from sklearn.datasets import load_iris
+    iris = load_iris()
+    df = pd.DataFrame(data= np.c_[iris['data'], iris['target']],
+                     columns= iris['feature_names'] + ['target'])
+    return df
+
+@st.cache
 def change_col_name(df):
     """
     Purpose: this function aims to convert the columns name into small letters.
@@ -57,7 +65,8 @@ def download_pred_df(df, features, target, model):
     df['y_pred'] = model.predict(df[features])
     df['accr'] = np.where(df[target] == df['y_pred'], True, False)
     df = df[[target] + ['y_pred', 'accr'] + features]
-    download(df)
+    st.markdown('download function is currently disabled')
+    # download(df)
 
 def categorical_automl():
     # main
@@ -65,38 +74,50 @@ def categorical_automl():
     st.write('This app is powered by Streamlit, Sklearn, XGBoost, CatBoost and LightGBM')
     df, uploaded = upload_file(file_type = ['csv', 'xlsx', 'xls'], show_file_info = True)
     if not uploaded:
-        st.stop()
-        
-    preview_df = st.checkbox('Preview dataframe')
-    if preview_df:
+        demo = st.sidebar.radio('Enable Demo', ('Yes', 'No'), index=1)
+        if demo == 'Yes':
+            df = iris_dataset()
+    else:
+        demo = 'No'
+    
+    if df.empty:
+        st.stop()    
+    
+    st.checkbox('Preview dataframe', key='preview_df') if demo == 'No' else None
+    if 'preview_df' not in st.session_state:
+        st.session_state.preview_df = False 
+    if st.session_state.preview_df or demo == 'Yes':
         st.subheader('Preview uploaded dataframe') if uploaded else st.subheader('Preview demo dataframe')
         st.dataframe(df.head())
     
-    st.write('If you would like to do EDA for the dataset, please reach to the EDA page accordingly')
-    training = st.number_input('Training ratio:', min_value=.1, max_value=1., 
-                               value=.7, help='At least 10% of the data has to be trained')
+    st.markdown('*If you would like to do EDA for the dataset, please reach to the EDA page accordingly*')
+    training = st.sidebar.number_input('Training ratio:', min_value=.1, max_value=1., 
+                               value=.7, key='training_ratio', 
+                               help='At least 10% of the data has to be trained') if demo == 'No' else .7
     st.write(f'The model will use {training*100:.2f}% data as the training set and the remaining as testing set')
     
-    target = st.text_input('Please input target variable:', '').lower()
+    target = st.sidebar.text_input('Please input target variable:', '', key='target').lower()\
+        if demo == 'No' else 'target'
+        
     if target != '' and target not in df.columns:
         st.error("target is not found in the dataset")
         st.stop()
     elif target == '':
         st.stop()
-    # elif target not in df.select_dtypes(include='object').columns:
-    #     st.error('The input target variable is not categorical data, please select others')
-    #     st.stop()
         
-    # feature columns
+    # potential feature columns
     options = list(df.columns)
     options.remove(target)
     
-    features = st.multiselect('How many features do you want to keep?',
+    features = st.sidebar.multiselect('How many features do you want to keep?',
                              options,
                              default=options,
-                             help='By default, the program will take all the columns as features. It is suggested to remove identifier since it should be useless.')
+                             help='By default, the program will take all the columns as features. It is suggested to remove identifier since it should be useless.')\
+        if demo == 'No' else options
     
-    if not st.checkbox('Please confirm the features before further processing'):
+    feature_processing = st.sidebar.checkbox('Please confirm the features before further processing')\
+        if demo == 'No' else True
+    if not feature_processing:
         st.stop()
     
     # transform target variable
@@ -120,15 +141,18 @@ def categorical_automl():
     st.write('Preview transformed dataset')
     st.dataframe(df[[target] +features].head())
     
-    options = st.multiselect('Which modeles do you want to create?', 
+    options = st.sidebar.multiselect('Which models do you want to create?', 
                              ['Random Forest', 'XGBoost', 'CatBoost', 'LightGBM', 'Logistic Regression'],
                              default=['XGBoost'],
-                             help='By default, the program will develop a XGBoost model as it is in general with high accuracy. You can choose more for comparison.')
+                             help='By default, the program will develop a XGBoost model as it is in general with high accuracy. You can choose more for comparison.')\
+        if demo == 'No' else ['Random Forest', 'XGBoost', 'CatBoost', 'LightGBM', 'Logistic Regression']
     
-    if not st.checkbox('Please confirm the models before further processing'):
-        st.stop()
+    model_processing = st.sidebar.checkbox('Please confirm the models before further processing')\
+        if demo == 'No' else True
+    if not model_processing:
+        st.stop()  
     if len(options) <= 0:
-        st.error('Please select any models')
+        st.error('No model is selected')
         st.stop()
     
     st.title('Data Modeling')
@@ -144,32 +168,27 @@ def categorical_automl():
         with st.spinner('Model development in progress'):
             tree = RandomForestClassifier(random_state=1)
             model = automl(tree, x_train, x_test, y_train, y_test)
-            # if st.checkbox('Do you want to donwload the result?'):
-            #     download_pred_df(df, features, target, model)
+            download_pred_df(df, features, target, model)
     if 'XGBoost' in options:
         with st.spinner('Model development in progress'):
             xgb = XGBClassifier()
             model = automl(xgb, x_train, x_test, y_train, y_test)
-            # if st.checkbox('Do you want to donwload the result?'):
-            #     download_pred_df(df, features, target, model)
+            download_pred_df(df, features, target, model)
     if 'CatBoost' in options:
         with st.spinner('Model development in progress'):
             cat = CatBoostClassifier(random_seed=1, verbose=0)
             model = automl(cat, x_train, x_test, y_train, y_test)
-            # if st.checkbox('Do you want to donwload the result?'):
-            #     download_pred_df(df, features, target, model)
+            download_pred_df(df, features, target, model)
     if 'LightGBM' in options:
         with st.spinner('Model development in progress'):
             lgb = LGBMClassifier()
             model = automl(lgb, x_train, x_test, y_train, y_test)
-            # if st.checkbox('Do you want to donwload the result?'):
-            #     download_pred_df(df, features, target, model)
+            download_pred_df(df, features, target, model)
     if 'Logistic Regression' in options:
         with st.spinner('Model development in progress'):
             logit = LogisticRegression(random_state=1)
             model = automl(logit, x_train, x_test, y_train, y_test)
-            # if st.checkbox('Do you want to donwload the result?'):
-            #     download_pred_df(df, features, target, model)
+            download_pred_df(df, features, target, model)
 
 
 # fig, ax = plt.subplots(figsize=(4,4))

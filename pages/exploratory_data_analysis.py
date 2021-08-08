@@ -14,7 +14,8 @@ from func.upload_file import upload_file
 def iris_dataset():
     from sklearn.datasets import load_iris
     iris = load_iris()
-    df = pd.DataFrame(data=iris.data, columns=iris.feature_names)
+    df = pd.DataFrame(data= np.c_[iris['data'], iris['target']],
+                     columns= iris['feature_names'] + ['target'])
     return df
 
 # @st.cache(suppress_st_warning=True)
@@ -45,6 +46,7 @@ def corr(df, correlation = .7):
     _ = _[_['level_0'] != _['level_1']]
     return _[(_[0] >= correlation) | (_[0] <= -correlation)].reset_index(drop=True)
     
+@st.cache(suppress_st_warning=True)
 def describe_corr(df, bucket=st):
     if df.empty:
         bucket.write('The columns are with low correlation between each other')
@@ -65,7 +67,7 @@ def plot_corr(df, bucket=st):
     fig, ax = plt.subplots(figsize=(16,12))
     sns.heatmap(df.select_dtypes(include='number').corr(),
                annot=True, square=True, ax=ax, vmin=-1, vmax=1)
-    bucket.pyplot(fig)
+    return fig
 
 def exploratory_data_analysis():
     st.title('Exploratory Data Analysis')
@@ -75,22 +77,23 @@ def exploratory_data_analysis():
     st.markdown("""*Remark: for simplicity, it is now not supported for configurating to specify the row number of column header.
                 Let me know if it is an important feature if necessary.*""")
     df = pd.DataFrame()
-    col1, col2 = st.beta_columns((3, 1))
     
-    with col1:
-        df, uploaded = upload_file(file_type = ['csv', 'xlsx', 'xls'], show_file_info = True)
-    
-    with col2: 
-        if not uploaded:
-            if st.checkbox('demo', help='Iris data will be used if you check this option'):
-                df = iris_dataset()
+    df, uploaded = upload_file(file_type = ['csv', 'xlsx', 'xls'], show_file_info = True)
+    if not uploaded:
+        demo = st.sidebar.radio('Enable Demo', ('Yes', 'No'), index=1)
+        if demo == 'Yes':
+            df = iris_dataset()
+    else:
+        demo = 'No'
     
     # if dataframe is empty, stop program
     if df.empty:
         st.stop()
     
-    preview_df = st.checkbox('Preview dataframe')
-    if preview_df:
+    st.checkbox('Preview dataframe', key='preview_df') if demo == 'No' else None
+    if 'preview_df' not in st.session_state:
+        st.session_state.preview_df = False 
+    if st.session_state.preview_df or demo == 'Yes':
         st.subheader('Preview uploaded dataframe') if uploaded else st.subheader('Preview demo dataframe')
         st.dataframe(df.head())
             
@@ -122,10 +125,14 @@ def exploratory_data_analysis():
     # we don't use expander at the moment since it is by default will run everything
     # optional_1 = st.beta_expander("Optional Functions: Visualize column behavior", False)
     
-    # visualize columns
-    st.checkbox('Optional Functions: Visualize column behavior', key='plot_cols')
+    # enable plot button only not in demo mode
+    st.checkbox('Optional Functions: Visualize column behavior', key='plot_cols')\
+        if demo == 'No' else None
+    if 'plot_cols' not in st.session_state:
+        st.session_state.plot_cols = False
     
-    if st.session_state.plot_cols:
+    # visualize columns
+    if st.session_state.plot_cols or demo == 'Yes':
         if len(df.select_dtypes(include=['object']).columns)>0:
             st.write('Plot Object Columns')
             for col in df.select_dtypes(include=['object']).columns:
@@ -137,16 +144,19 @@ def exploratory_data_analysis():
 
     # optional_2 = st.beta_expander("Optional Functions: Data Correlation", False)
     
-    # show data correlation
-    st.checkbox('Optional Functions: Data Correlation', key='get_corr')
+    st.checkbox('Optional Functions: Data Correlation', key='get_corr')\
+        if demo == 'No' else None
+    if 'get_corr' not in st.session_state:
+        st.session_state.get_corr = False
     
-    if st.session_state.get_corr:
+    # show data correlation
+    if st.session_state.get_corr or demo == 'Yes':
         corr_factor = .7
-        corr_factor = st.slider('Show variables with +-{0} correlation'.format(corr_factor), 
+        corr_factor = st.sidebar.slider('Configuration: Show variables with +-{0} correlation'.format(corr_factor), 
                                 min_value=0., max_value=1., value=corr_factor)
         corr_df = corr(df, corr_factor)
         st.dataframe(corr_df)
         # st.dataframe(corr_df.style.applymap(color_df, subset=[0])) # there is bug on the style
         describe_corr(corr_df, st)
         st.markdown('**Correlation chart for all variables within the dataset**')
-        plot_corr(df, st)
+        st.write(plot_corr(df, st))
