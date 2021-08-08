@@ -39,8 +39,8 @@ def main():
                      plot feature importance,
                      plot criteria, 
                      allow upload to predict new data)<br>
-                6. Sentiment Analysis (Not Yet Developed)
-                7. Image Classification (Not Yet Developed)
+                6. Sentiment Analysis (Not Yet Developed)<br>
+                7. Image Classification (Not Yet Developed)<br>
                 """, unsafe_allow_html=True)
     
     # count page views
