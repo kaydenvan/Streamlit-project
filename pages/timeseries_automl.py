@@ -41,16 +41,27 @@ def stock_automl():
     st.markdown("""With the limited resource on streamlit free tier, 
                 it is developed with purpose that the low accuracy on the time series prediction.""")
     st.markdown("This app currently supports US stock only.")
-    stock_symbol = st.text_input('Please input stock symbol', '').strip()
+    
+    demo = st.sidebar.radio('Enable Demo', ('Yes', 'No'), index=1, 
+                            help='AAPL will be used as the demo and by default 5-year records used')
+    
+    col1, col2 = st.beta_columns(2)
+    with col1:
+        stock_symbol = st.text_input('Please input stock symbol', '').strip() if demo == 'No' else 'AAPL'
+    
+    with col2:
+        period_ = st.selectbox('How long would you extract?',
+                               ('1y','2y','5y','10y','ytd','max'),
+                               index=2) if demo == 'No' else '5y'
+    
     if len(stock_symbol.strip()) != 0:
-        df = yf.Ticker(stock_symbol).history(period='10y')
-        # df = get_stock_info(stock_symbol, period='10y')
+        df = yf.Ticker(stock_symbol).history(period=period_)
         df.reset_index(inplace=True, drop=False)
         if df.empty:
             st.error('stock symbol is invalid')  
             st.stop()
         else:
-            st.write(f'{stock_symbol.upper()} historical record is retriving')
+            st.write(f'{stock_symbol.upper()} {period_.upper()} historical record is retriving')
             st.write(f'Stock record from {min(df.Date).date()} to {max(df.Date).date()}')
     else: 
         st.stop()
@@ -88,13 +99,14 @@ def stock_automl():
 
     with st.spinner('model develop in progress'):
         model = prophet_model(df, 'Date', 'Close', daily_seasonality=True)
-        st.success('Model created')
+        # st.success('Model created')
     
-    check_forecast = st.checkbox('Do you want to forecast the stock price?')
+    check_forecast = st.checkbox('Do you want to forecast the stock price?') if demo == 'No' else True
     
     if check_forecast:
         predict_days = st.slider('Select the number of days you want to predict',
-                         min_value=7, max_value=max_predict_day)
+                         min_value=7, max_value=max_predict_day,value=30, step=1)\
+            if demo == 'No' else 30
         with st.spinner('Wait for model forecast'):
             forecast = forecast_model(model, max_predict_day, freq='D')
             
@@ -115,7 +127,7 @@ def stock_automl():
                         unsafe_allow_html=True)
             
         # optional graph
-        optionals = st.beta_expander("Optional Functions", False)
+        optionals = st.beta_expander("Optional Functions", False) if demo == 'No' else st.beta_expander("Optional Functions", True)
         optionals.markdown('**Prediction dataframe**')
         optionals.dataframe(forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(predict_days))
         optionals.markdown('**Model components**')

@@ -134,9 +134,7 @@ def customer_autosegment():
     if preview_df:
         st.subheader('Preview uploaded dataframe') if uploaded else st.subheader('Preview demo dataframe')
         st.dataframe(df.head())
-        
     
-        
     st.write('If you would like to do EDA for the dataset, please reach to the EDA page accordingly')
     clusters = st.number_input('Number of Clusters you want to test',
                                min_value = 2,

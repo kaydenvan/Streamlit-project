@@ -10,7 +10,7 @@ def update():
     st.markdown("""
                 *8th Aug 2021*\n
                 1. Update demo function in EDA
-                2. Add demo function in categorical automl
+                2. Add demo function in categorical automl and stock auto ml
                 """)
     st.markdown("""
                 *6th Aug 2021*\n
