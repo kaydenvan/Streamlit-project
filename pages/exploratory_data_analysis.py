@@ -5,6 +5,7 @@ Created on Sat Jul 24 01:12:50 2021
 @author: van_s
 """
 import streamlit as st
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
