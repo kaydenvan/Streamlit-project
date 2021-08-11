@@ -8,6 +8,10 @@ import streamlit as st
 
 def update():
     st.markdown("""
+                *9th Aug 2021*\n
+                1. Minor update on demo function
+                """)
+    st.markdown("""
                 *8th Aug 2021*\n
                 1. Update demo function in EDA
                 2. Add demo function in categorical automl and stock auto ml

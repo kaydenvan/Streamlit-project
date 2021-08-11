@@ -148,13 +148,13 @@ def exploratory_data_analysis():
     st.checkbox('Optional Functions: Data Correlation', key='get_corr')\
         if demo == 'No' else None
     if 'get_corr' not in st.session_state:
-        st.session_state.get_corr = False
+        st.session_state.get_corr = True
     
     # show data correlation
-    if st.session_state.get_corr or demo == 'Yes':
+    if st.session_state.get_corr:
         corr_factor = .7
         corr_factor = st.sidebar.slider('Configuration: Show variables with +-{0} correlation'.format(corr_factor), 
-                                min_value=0., max_value=1., value=corr_factor)
+                                min_value=0., max_value=1., value=.7) if demo == 'No' else .7
         corr_df = corr(df, corr_factor)
         st.dataframe(corr_df)
         # st.dataframe(corr_df.style.applymap(color_df, subset=[0])) # there is bug on the style
