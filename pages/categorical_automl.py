@@ -36,7 +36,7 @@ def change_col_name(df):
     Purpose: this function aims to convert the columns name into small letters.
 
     """
-    cols_name = [x.lower() for x in df.columns]
+    cols_name = [x.lower().strip() for x in df.columns]
     df.columns = cols_name
     return df
 
@@ -83,12 +83,12 @@ def categorical_automl():
     if df.empty:
         st.stop()    
     
-    st.checkbox('Preview dataframe', key='preview_df') if demo == 'No' else None
-    if 'preview_df' not in st.session_state:
-        st.session_state.preview_df = False 
-    if st.session_state.preview_df or demo == 'Yes':
-        st.subheader('Preview uploaded dataframe') if uploaded else st.subheader('Preview demo dataframe')
-        st.dataframe(df.head())
+    # st.checkbox('Preview dataframe', key='preview_df') if demo == 'No' else None
+    # if 'preview_df' not in st.session_state:
+    #     st.session_state.preview_df = False 
+    # if demo == 'Yes':
+    st.subheader('Preview uploaded dataframe') if uploaded else st.subheader('Preview demo dataframe')
+    st.dataframe(df.head())
     
     st.markdown('*If you would like to do EDA for the dataset, please reach to the EDA page accordingly*')
     training = st.sidebar.number_input('Training ratio:', min_value=.1, max_value=1., 
@@ -96,7 +96,7 @@ def categorical_automl():
                                help='At least 10% of the data has to be trained') if demo == 'No' else .7
     st.write(f'The model will use {training*100:.2f}% data as the training set and the remaining as testing set')
     
-    target = st.sidebar.text_input('Please input target variable:', '', key='target').lower()\
+    target = st.sidebar.selectbox('Please input target variable:', options=df.columns, key='target')\
         if demo == 'No' else 'target'
         
     if target != '' and target not in df.columns:
@@ -147,7 +147,7 @@ def categorical_automl():
                              help='By default, the program will develop a XGBoost model as it is in general with high accuracy. You can choose more for comparison.')\
         if demo == 'No' else ['Random Forest', 'XGBoost', 'CatBoost', 'LightGBM', 'Logistic Regression']
     
-    model_processing = st.sidebar.checkbox('Please confirm the models before further processing')\
+    model_processing = st.sidebar.button('Confirm')\
         if demo == 'No' else True
     if not model_processing:
         st.stop()  

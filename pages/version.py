@@ -8,6 +8,10 @@ import streamlit as st
 
 def update():
     st.markdown("""
+                *122th Aug 2021*\n
+                1. Minor update on categorical automl
+                """)
+    st.markdown("""
                 *9th Aug 2021*\n
                 1. Minor update on demo function
                 """)
