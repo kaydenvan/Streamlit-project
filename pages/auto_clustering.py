@@ -29,6 +29,7 @@ def get_optimal_features(df, **kwargs):
     variance = pca.explained_variance_ratio_ 
     var=np.cumsum(np.round(variance, 3)*100)
     keep_feature = np.count_nonzero(var < ratio)+1
+    keep_feature = keep_feature if keep_feature < len(df.columns) else len(df.columns)
     
     if plot_pca:
         fig, ax = plt.subplots()
