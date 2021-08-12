@@ -10,6 +10,7 @@ def update():
     st.markdown("""
                 *122th Aug 2021*\n
                 1. Minor update on categorical automl
+                2. Minor update on auto clustering
                 """)
     st.markdown("""
                 *9th Aug 2021*\n
