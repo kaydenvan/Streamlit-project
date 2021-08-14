@@ -8,6 +8,10 @@ import streamlit as st
 
 def update():
     st.markdown("""
+                *14th Aug 2021*\n
+                1. Plot function on auto clustering
+                """)
+    st.markdown("""
                 *12th Aug 2021*\n
                 1. Minor update on categorical automl
                 2. Minor update on auto clustering

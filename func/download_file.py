@@ -8,7 +8,7 @@ import streamlit as st
 import base64
 import io
 
-def download(df):
+def download_file(df):
     towrite = io.BytesIO()
     downloaded_file = df.to_excel(towrite, encoding='utf-8', index=False, header=True)
     towrite.seek(0)  # reset pointer

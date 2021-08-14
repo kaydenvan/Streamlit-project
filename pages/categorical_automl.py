@@ -18,7 +18,7 @@ from lightgbm import LGBMClassifier
 from sklearn.metrics import accuracy_score, recall_score, precision_score
 from sklearn.metrics import classification_report\
     # , plot_confusion_matrix
-from func.download_file import download
+from func.download_file import download_file
 from func.upload_file import upload_file
 import warnings
 warnings.filterwarnings('ignore')
