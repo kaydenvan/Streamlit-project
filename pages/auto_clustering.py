@@ -19,7 +19,21 @@ from kneed import KneeLocator
 from func.download_file import download_file
 from func.upload_file import upload_file
 
+def iris_dataset():
+    from sklearn.datasets import load_iris
+    iris = load_iris()
+    df = pd.DataFrame(data= np.c_[iris['data'], iris['target']],
+                     columns= iris['feature_names'] + ['target'])
+    return df
+
 def get_optimal_features(df, **kwargs):
+    """
+    find optimal features from data
+    df: pd.DataFrame, input dataset
+    plot_pca: boolean, plot for pca against feature coverage
+    ratio: float, pca ratio
+    df_pca: boolean, return transformed pca dataframe or not
+    """
     plot_pca = kwargs.get('plot_pca', False)
     pca = PCA(n_components=len(df.columns))
     pca.fit(df)
@@ -54,6 +68,12 @@ def get_optimal_features(df, **kwargs):
     return keep_feature
 
 def computer_kmeans(df, clusters, **kwargs):
+    """
+    df: pd.DataFrame, input dataset
+    clusters: int, number of clusters to be tested
+    elbow: boolean, return elbow result 
+    silouette_score: boolean, return silouette score
+    """
     elbow = kwargs.get('elbow', False)
     silouette_score = kwargs.get('silouette_score', False)
     sse = []
@@ -74,7 +94,9 @@ def computer_kmeans(df, clusters, **kwargs):
     kmeans = KMeans(n_clusters=optimal_k).fit(df)
     labels = kmeans.labels_
     if not elbow:
-        sse =[]
+        sse = []
+    if not silouette_score:
+        sil = []
     return optimal_k, labels, kmeans, sse, sil
      
 @st.cache
@@ -83,8 +105,6 @@ def computer_dbscan(df, **kwargs):
     min_samples_ = kwargs.get('min_samples', 5)
     dbs = DBSCAN(eps=eps_, min_samples=min_samples_)
     dbs.fit(df)
-    # core_samples_mask = np.zeros_like(dbs.labels_, dtype=bool)
-    # core_samples_mask[dbs.core_sample_indices_] = True
     labels = dbs.labels_
     
     # Number of clusters in labels, ignoring noise if present.
@@ -155,19 +175,25 @@ def download_pred_df(df):
 def auto_clustering():
     st.title('Auto Clustering')
     st.write('This app is powered by Streamlit, Sklearn.')
-    df, uploaded = upload_file(file_type = ['csv', 'xlsx', 'xls'], show_file_info = True)
+    df = pd.DataFrame()
     
+    df, uploaded = upload_file(file_type = ['csv', 'xlsx', 'xls'], show_file_info = True)
     if not uploaded:
+        demo = st.sidebar.radio('Enable Demo', ('Yes', 'No'), index=1,
+                                help='Iris dataset is used for demonstration purpose')
+        if demo == 'Yes':
+            df = iris_dataset()
+            df.drop(columns = 'target', inplace=True)
+    else:
+        demo = 'No'
+    
+    # if dataframe is empty, stop program
+    if df.empty:
         st.stop()
         
-    preview_df = st.checkbox('Preview dataframe')
-    if preview_df:
-        st.subheader('Preview uploaded dataframe') if uploaded else st.subheader('Preview demo dataframe')
-        st.dataframe(df.head())
-    
-    st.write('If you would like to do EDA for the dataset, please reach to the EDA page accordingly')
-    
-    
+    st.subheader('Preview uploaded dataframe') if uploaded else st.subheader('Preview demo dataframe')
+    st.dataframe(df.head())
+
     # data cleaning for KMeans
     imp_median = SimpleImputer(strategy='median')
     imp_freq = SimpleImputer(strategy='most_frequent')
@@ -185,6 +211,7 @@ def auto_clustering():
                                     ('KMeans', 'DBSCAN'),
                                     help='Select clustering method')
     
+    # pca analysis
     pca_ = st.sidebar.checkbox('Enable PCA', help='Use PCA (1) to analysis and (2) transform and reduce dimension')
     df_pca = pd.DataFrame()
     if pca_:
@@ -193,26 +220,21 @@ def auto_clustering():
         # can add slider to ask what % variance has to be covered
         optimal_feature, df_pca = get_optimal_features(df, plot_pca=True, ratio=ratio_, df_pca=True)
         st.write(f'{optimal_feature} feature(s) is/are used for clustering. It can cover {ratio_*100}% of original features')
+        if st.checkbox('Preview cleaned dataset'):
+            st.dataframe(df)
     
     if not df_pca.empty:
         df = df_pca
-
-    if st.checkbox('Preview cleaned dataset'):
-        st.dataframe(df)
     
     if model_option == 'KMeans':
-        elbow_ = st.sidebar.checkbox('Elbow Method', help='Check it if you want to show Elbow Chart')
-        silouette_score_ = st.sidebar.checkbox('Silhouette Coefficients', help='Check it if you want to show Silhouette Coefficients')
-        plot_cluster_correlation_ = st.sidebar.checkbox('Plot clustering verus dimensions', help='Check it if you want to select how dimensions correlate with clustering')
+        elbow_ = st.sidebar.checkbox('Elbow Method', help='Check it if you want to show Elbow Chart') if demo == 'No' else True
+        silouette_score_ = st.sidebar.checkbox('Silhouette Coefficients', help='Check it if you want to show Silhouette Coefficients') if demo == 'No' else True
+        plot_cluster_correlation_ = st.sidebar.checkbox('Plot clustering verus dimensions', help='Check it if you want to select how dimensions correlate with clustering') if demo == 'No' else True
         
-        clusters = st.number_input('Number of Clusters you want to test',
-                               min_value = 2,
-                               max_value = 20,
-                               value=10,
-                               step=1,
-                               help='At least 2 cluster has to be formed')
-        clusters = int(clusters)
-        # st.write(f'The model will be tested in {clusters} clusters')
+        # clusters = st.number_input('Number of Clusters you want to test', min_value = 2,max_value = 20,
+        #                        value=10, step=1, help='At least 2 cluster has to be formed')
+        # for simplicity, default to test 20 clusters
+        clusters = int(20)
         
         optimal_k, df['y_pred'], model, sse, sil = computer_kmeans(df, clusters, elbow=elbow_, silouette_score=silouette_score_)
         st.write(f'Optimal number of cluster under Elbow Method: {optimal_k}')
@@ -226,14 +248,17 @@ def auto_clustering():
         if silouette_score_:
             st.write(plot_silhouette_score(clusters, sil))
     
+        # plot interactive clustering chart
         if plot_cluster_correlation_:
             col1, col2 = st.columns(2)
-            plot_columns = df.columns.to_list()
-            plot_columns.remove('y_pred')
+            plot_cols_x = df.columns.to_list()
+            plot_cols_x.remove('y_pred')
             with col1:
-                x_axis = st.selectbox('Select x axis', plot_columns)
+                x_axis = st.selectbox('Select x axis', plot_cols_x)
             with col2:
-                y_axis = st.selectbox('Select y axis', plot_columns)
+                plot_cols_y = plot_cols_x.copy()
+                plot_cols_y.remove(x_axis)
+                y_axis = st.selectbox('Select y axis', plot_cols_y)
         
             st.write(plot_kmean_correlation(df, model, x_axis, y_axis))
         

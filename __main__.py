@@ -36,7 +36,7 @@ app.add_page('1. Exploratory Data Analysis', exploratory_data_analysis)
 # if unlock == True:
 app.add_page('2. Categorical AutoML', categorical_automl)
 app.add_page('3. Stock AutoML', stock_automl)
-app.add_page('Beta: Auto Clustering', auto_clustering)
+app.add_page('4. Auto Clustering', auto_clustering)
 app.add_page('Reference: version', update)
 
 # init instance

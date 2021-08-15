@@ -45,7 +45,7 @@ def stock_automl():
     demo = st.sidebar.radio('Enable Demo', ('Yes', 'No'), index=1, 
                             help='AAPL will be used as the demo and by default 5-year records used')
     
-    col1, col2 = st.beta_columns(2)
+    col1, col2 = st.columns(2)
     with col1:
         stock_symbol = st.text_input('Please input stock symbol', '').strip() if demo == 'No' else 'AAPL'
     
@@ -101,38 +101,36 @@ def stock_automl():
         model = prophet_model(df, 'Date', 'Close', daily_seasonality=True)
         # st.success('Model created')
     
-    check_forecast = st.checkbox('Do you want to forecast the stock price?') if demo == 'No' else True
-    
-    if check_forecast:
-        predict_days = st.slider('Select the number of days you want to predict',
-                         min_value=7, max_value=max_predict_day,value=30, step=1)\
-            if demo == 'No' else 30
-        with st.spinner('Wait for model forecast'):
-            forecast = forecast_model(model, max_predict_day, freq='D')
-            
-            # plot graph
-            fig, ax = plt.subplots()
-            forecast_plot_df = forecast.set_index('ds')[['yhat']][-(60+max_predict_day-predict_days):-(max_predict_day-predict_days)]
-            actual_plot_df = df.set_index('Date')[['Close']][(df[df['Date'] == min(forecast_plot_df.index)].index.values[0]):]
-            ax.plot(forecast_plot_df, color='r', label='forecast')
-            ax.plot(actual_plot_df, color='g', label='actual')
-            ax.legend()
-            plt.xticks(rotation=45)
-            st.write(fig)
-            
-            # summary
-            changes = ((forecast_plot_df.iloc[-1] - forecast_plot_df.iloc[0])/forecast_plot_df.iloc[0])[0]
-            color = 'green' if changes > 0 else 'black' if changes == 0 else 'red'
-            st.markdown(f"<font color='{color}'>**Quick Summary**: With {predict_days} days prediction, {stock_symbol} is expected to have {changes*100:.2f}% changes.</font>", 
-                        unsafe_allow_html=True)
-            
-        # optional graph
-        optionals = st.beta_expander("Optional Functions", False) if demo == 'No' else st.beta_expander("Optional Functions", True)
-        optionals.markdown('**Prediction dataframe**')
-        optionals.dataframe(forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(predict_days))
-        optionals.markdown('**Model components**')
-        fig = model.plot_components(forecast[:-(max_predict_day-predict_days)])
-        optionals.write(fig)
+
+    predict_days = st.slider('Select the number of days you want to predict',
+                     min_value=7, max_value=max_predict_day,value=30, step=1)\
+        if demo == 'No' else 30
+    with st.spinner('Wait for model forecast'):
+        forecast = forecast_model(model, max_predict_day, freq='D')
+        
+        # plot graph
+        fig, ax = plt.subplots()
+        forecast_plot_df = forecast.set_index('ds')[['yhat']][-(60+max_predict_day-predict_days):-(max_predict_day-predict_days)]
+        actual_plot_df = df.set_index('Date')[['Close']][(df[df['Date'] == min(forecast_plot_df.index)].index.values[0]):]
+        ax.plot(forecast_plot_df, color='r', label='forecast')
+        ax.plot(actual_plot_df, color='g', label='actual')
+        ax.legend()
+        plt.xticks(rotation=45)
+        st.write(fig)
+        
+        # summary
+        changes = ((forecast_plot_df.iloc[-1] - forecast_plot_df.iloc[0])/forecast_plot_df.iloc[0])[0]
+        color = 'green' if changes > 0 else 'black' if changes == 0 else 'red'
+        st.markdown(f"<font color='{color}'>**Quick Summary**: With {predict_days} days prediction, {stock_symbol} is expected to have {changes*100:.2f}% changes.</font>", 
+                    unsafe_allow_html=True)
+        
+    # optional graph
+    optionals = st.expander("Optional Functions", False) if demo == 'No' else st.beta_expander("Optional Functions", True)
+    optionals.markdown('**Prediction dataframe**')
+    optionals.dataframe(forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(predict_days))
+    optionals.markdown('**Model components**')
+    fig = model.plot_components(forecast[:-(max_predict_day-predict_days)])
+    optionals.write(fig)
 
 
 

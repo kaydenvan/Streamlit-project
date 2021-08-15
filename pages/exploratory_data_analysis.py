@@ -81,7 +81,8 @@ def exploratory_data_analysis():
     
     df, uploaded = upload_file(file_type = ['csv', 'xlsx', 'xls'], show_file_info = True)
     if not uploaded:
-        demo = st.sidebar.radio('Enable Demo', ('Yes', 'No'), index=1)
+        demo = st.sidebar.radio('Enable Demo', ('Yes', 'No'), index=1,
+                                help='Iris dataset is used for demonstration purpose')
         if demo == 'Yes':
             df = iris_dataset()
     else:

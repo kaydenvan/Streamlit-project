@@ -32,7 +32,7 @@ def main():
                 1. Exploratory Data Analysis<br>
                 2. Categorical Prediction (Auto)<br>
                 3. Stock Time Series Prediction (Auto)<br>
-                4. Customer Segmentation (Auto) (Beta 0.1)<br>
+                4. Customer Segmentation (Auto)<br>
                 5. One classification model detail analysis (Not Yet Developed)<br>
                     (e.g. pick one model, 
                      train model, 

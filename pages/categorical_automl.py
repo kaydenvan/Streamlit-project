@@ -74,7 +74,8 @@ def categorical_automl():
     st.write('This app is powered by Streamlit, Sklearn, XGBoost, CatBoost and LightGBM')
     df, uploaded = upload_file(file_type = ['csv', 'xlsx', 'xls'], show_file_info = True)
     if not uploaded:
-        demo = st.sidebar.radio('Enable Demo', ('Yes', 'No'), index=1)
+        demo = st.sidebar.radio('Enable Demo', ('Yes', 'No'), index=1,
+                                help='Iris dataset is used for demonstration purpose')
         if demo == 'Yes':
             df = iris_dataset()
     else:
@@ -83,14 +84,10 @@ def categorical_automl():
     if df.empty:
         st.stop()    
     
-    # st.checkbox('Preview dataframe', key='preview_df') if demo == 'No' else None
-    # if 'preview_df' not in st.session_state:
-    #     st.session_state.preview_df = False 
-    # if demo == 'Yes':
     st.subheader('Preview uploaded dataframe') if uploaded else st.subheader('Preview demo dataframe')
     st.dataframe(df.head())
-    
     st.markdown('*If you would like to do EDA for the dataset, please reach to the EDA page accordingly*')
+    
     training = st.sidebar.number_input('Training ratio:', min_value=.1, max_value=1., 
                                value=.7, key='training_ratio', 
                                help='At least 10% of the data has to be trained') if demo == 'No' else .7
