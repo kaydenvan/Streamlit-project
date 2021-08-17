@@ -13,6 +13,7 @@ def update():
                 *17th Aug 2021*\n
                 1. Add XGBoosting detail function
                 2. Roll back for beta_columns and beta_expander since streamlit online version is outdated
+                3. Redesign UI UX
                 """)
     st.markdown("""
                 *15th Aug 2021*\n

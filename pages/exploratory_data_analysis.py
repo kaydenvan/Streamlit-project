@@ -47,7 +47,7 @@ def corr(df, correlation = .7):
     _ = _[_['level_0'] != _['level_1']]
     return _[(_[0] >= correlation) | (_[0] <= -correlation)].reset_index(drop=True)
     
-@st.cache(suppress_st_warning=True)
+# @st.cache(suppress_st_warning=True)
 def describe_corr(df, bucket=st):
     if df.empty:
         bucket.write('The columns are with low correlation between each other')
@@ -92,12 +92,8 @@ def exploratory_data_analysis():
     if df.empty:
         st.stop()
     
-    st.checkbox('Preview dataframe', key='preview_df') if demo == 'No' else None
-    if 'preview_df' not in st.session_state:
-        st.session_state.preview_df = False 
-    if st.session_state.preview_df or demo == 'Yes':
-        st.subheader('Preview uploaded dataframe') if uploaded else st.subheader('Preview demo dataframe')
-        st.dataframe(df.head())
+    show_upload = st.beta_expander('Preview uploaded dataframe', expanded=True) if uploaded else st.expander('Preview demo dataframe', expanded=True)
+    show_upload.dataframe(df.head(50))
             
     rows, cols_no = df.shape[0], df.shape[1]
     cols = ', '.join(df.columns)
@@ -106,8 +102,8 @@ def exploratory_data_analysis():
     st.write()
     
     # generate highlevel description
-    st.subheader('Summary of the dataframe')
-    st.dataframe(df.describe())
+    show_summary = st.beta_expander('Summary of dataframe', expanded=False)
+    show_summary.dataframe(df.describe())
 
     # see if any null field
     st.subheader('Number of null field in each column')
@@ -115,6 +111,7 @@ def exploratory_data_analysis():
     if not null_df.empty:
         st.dataframe(null_df.transpose())
     else:
+         
         st.write('No null column found')
         
     # categorize column type
@@ -123,42 +120,31 @@ def exploratory_data_analysis():
     st.markdown(f"*Object Cols*: {', '.join(df.select_dtypes(include=['object']).columns.values)}")
     st.markdown(f"*Datetime Cols*: {', '.join(df.select_dtypes(include=['datetime64']).columns.values)}")
     st.markdown(f"*Boolean Cols*: {', '.join(df.select_dtypes(include=['bool']).columns.values)}")
-    
-    # we don't use expander at the moment since it is by default will run everything
-    # optional_1 = st.beta_expander("Optional Functions: Visualize column behavior", False)
-    
+        
     # enable plot button only not in demo mode
-    st.checkbox('Optional Functions: Visualize column behavior', key='plot_cols')\
-        if demo == 'No' else None
-    if 'plot_cols' not in st.session_state:
-        st.session_state.plot_cols = False
+    show_plot_cols = st.beta_expander('Visualize column behavior', expanded=False)\
+        if demo == 'No' else st.beta_expander('Visualize column behavior', expanded=True)
     
     # visualize columns
-    if st.session_state.plot_cols or demo == 'Yes':
-        if len(df.select_dtypes(include=['object']).columns)>0:
-            st.write('Plot Object Columns')
-            for col in df.select_dtypes(include=['object']).columns:
-                _univariate_object(df, col, bucket=st)
-        if len(df.select_dtypes(include=['number']).columns)>0:
-            st.write('Plot Numeric Columns')
-            for col in df.select_dtypes(include=['number']).columns:
-                _univariate_numeric(df, col, bucket=st)
+    if len(df.select_dtypes(include=['object']).columns)>0:
+        show_plot_cols.write('Plot Object Columns')
+        for col in df.select_dtypes(include=['object']).columns:
+            _univariate_object(df, col, bucket=show_plot_cols)
+    if len(df.select_dtypes(include=['number']).columns)>0:
+        show_plot_cols.write('Plot Numeric Columns')
+        for col in df.select_dtypes(include=['number']).columns:
+            _univariate_numeric(df, col, bucket=show_plot_cols)
 
-    # optional_2 = st.beta_expander("Optional Functions: Data Correlation", False)
-    
-    st.checkbox('Optional Functions: Data Correlation', key='get_corr')\
-        if demo == 'No' else None
-    if 'get_corr' not in st.session_state:
-        st.session_state.get_corr = True
-    
+    show_corr = st.beta_expander('Data Correlation', expanded=False)\
+        if demo == 'No' else st.expander('Data Correlation', expanded=True)
+
     # show data correlation
-    if st.session_state.get_corr:
-        corr_factor = .7
-        corr_factor = st.sidebar.slider('Configuration: Show variables with +-{0} correlation'.format(corr_factor), 
-                                min_value=0., max_value=1., value=.7) if demo == 'No' else .7
-        corr_df = corr(df, corr_factor)
-        st.dataframe(corr_df)
-        # st.dataframe(corr_df.style.applymap(color_df, subset=[0])) # there is bug on the style
-        describe_corr(corr_df, st)
-        st.markdown('**Correlation chart for all variables within the dataset**')
-        st.write(plot_corr(df, st))
+    corr_factor = .7
+    corr_factor = show_corr.slider('Configuration: Show variables with +-{0} correlation'.format(corr_factor), 
+                            min_value=0., max_value=1., value=.7) if demo == 'No' else .7
+    corr_df = corr(df, corr_factor)
+    show_corr.dataframe(corr_df)
+    # st.dataframe(corr_df.style.applymap(color_df, subset=[0])) # there is bug on the style
+    describe_corr(corr_df, show_corr)
+    show_corr.markdown('**Correlation chart for all variables within the dataset**')
+    show_corr.write(plot_corr(df, show_corr))

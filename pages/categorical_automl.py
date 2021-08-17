@@ -65,14 +65,15 @@ def download_pred_df(df, features, target, model):
     df['y_pred'] = model.predict(df[features])
     df['accr'] = np.where(df[target] == df['y_pred'], True, False)
     df = df[[target] + ['y_pred', 'accr'] + features]
-    st.markdown('download function is currently disabled')
-    # download(df)
+    show_result = st.beta_expander('Preview result dataset', expanded=False)
+    show_result.dataframe(df.head(50))
+    # download_file(df)
 
 def categorical_automl():
     # main
     st.title('Auto Categorical ML')
     st.write('This app is powered by Streamlit, Sklearn, XGBoost, CatBoost and LightGBM')
-    df, uploaded = upload_file(file_type = ['csv', 'xlsx', 'xls'], show_file_info = True)
+    df, uploaded = upload_file(file_type = ['csv', 'xlsx', 'xls'], show_file_info = False)
     if not uploaded:
         demo = st.sidebar.radio('Enable Demo', ('Yes', 'No'), index=1,
                                 help='Iris dataset is used for demonstration purpose')
@@ -84,8 +85,8 @@ def categorical_automl():
     if df.empty:
         st.stop()    
     
-    st.subheader('Preview uploaded dataframe') if uploaded else st.subheader('Preview demo dataframe')
-    st.dataframe(df.head())
+    show_uploaded = st.beta_expander('Preview uploaded dataframe', expanded=True) if uploaded else st.expander('Preview demo dataframe', expanded=True)
+    show_uploaded.dataframe(df.head())
     st.markdown('*If you would like to do EDA for the dataset, please reach to the EDA page accordingly*')
     
     training = st.sidebar.number_input('Training ratio:', min_value=.1, max_value=1., 
@@ -95,13 +96,7 @@ def categorical_automl():
     
     target = st.sidebar.selectbox('Please input target variable:', options=df.columns, key='target')\
         if demo == 'No' else 'target'
-        
-    if target != '' and target not in df.columns:
-        st.error("target is not found in the dataset")
-        st.stop()
-    elif target == '':
-        st.stop()
-        
+               
     # potential feature columns
     options = list(df.columns)
     options.remove(target)
@@ -112,31 +107,37 @@ def categorical_automl():
                              help='By default, the program will take all the columns as features. It is suggested to remove identifier since it should be useless.')\
         if demo == 'No' else options
     
-    feature_processing = st.sidebar.checkbox('Please confirm the features before further processing')\
+    feature_processing = st.sidebar.button('Confirm', 
+                                           help='Please confirm the features before further processing')\
         if demo == 'No' else True
-    if not feature_processing:
-        st.stop()
     
     # transform target variable
-    le = LabelEncoder()
-    df[target] = le.fit_transform(df[target])
-    
-    with st.spinner('Quick Data Transformation and Cleansing are in process'):
-        imp_median = SimpleImputer(strategy='median')
-        imp_freq = SimpleImputer(strategy='most_frequent')
-        minmax = MinMaxScaler()
-        oe = OrdinalEncoder()
+    if feature_processing:
+        with st.spinner('Data transformation and cleansing are in process'):
+            le = LabelEncoder()
+            df[target] = le.fit_transform(df[target])
+            
+            imp_median = SimpleImputer(strategy='median')
+            imp_freq = SimpleImputer(strategy='most_frequent')
+            minmax = MinMaxScaler()
+            oe = OrdinalEncoder()
+            
+            for col in df[features].select_dtypes(include=['number']):
+                df[col] = imp_median.fit_transform(np.array(df[col]).reshape(-1, 1))
+                df[col] = minmax.fit_transform(np.array(df[col]).reshape(-1, 1))
+            for col in df[features].select_dtypes(include=['object']):
+                df[col] = imp_freq.fit_transform(np.array(df[col]).reshape(-1, 1))
+                df[col] = oe.fit_transform(np.array(df[col]).reshape(-1, 1))
+            st.session_state.df = df[[target] +features]
+       
+    if 'df' not in st.session_state:
+        st.stop()
+    else:
+        df = st.session_state.df
         
-        for col in df[features].select_dtypes(include=['number']):
-            df[col] = imp_median.fit_transform(np.array(df[col]).reshape(-1, 1))
-            df[col] = minmax.fit_transform(np.array(df[col]).reshape(-1, 1))
-        for col in df[features].select_dtypes(include=['object']):
-            df[col] = imp_freq.fit_transform(np.array(df[col]).reshape(-1, 1))
-            df[col] = oe.fit_transform(np.array(df[col]).reshape(-1, 1))
-    
-    st.write('For the purpose of data modeling, the dataset will be transformed accordingly')
-    st.write('Preview transformed dataset')
-    st.dataframe(df[[target] +features].head())
+    show_transform = st.beta_expander('Preview transformed dataset', expanded=False)
+    show_transform.write('For the purpose of data modeling, the dataset will be transformed accordingly')
+    show_transform.write(df.head(50))
     
     options = st.sidebar.multiselect('Which models do you want to create?', 
                              ['Random Forest', 'XGBoost', 'CatBoost', 'LightGBM', 'Logistic Regression'],
@@ -144,48 +145,46 @@ def categorical_automl():
                              help='By default, the program will develop a XGBoost model as it is in general with high accuracy. You can choose more for comparison.')\
         if demo == 'No' else ['Random Forest', 'XGBoost', 'CatBoost', 'LightGBM', 'Logistic Regression']
     
-    model_processing = st.sidebar.button('Confirm')\
-        if demo == 'No' else True
-    if not model_processing:
-        st.stop()  
-    if len(options) <= 0:
-        st.error('No model is selected')
-        st.stop()
+    model_processing_ = st.sidebar.button('Confirm') if demo == 'No' else True 
     
-    st.title('Data Modeling')
-    
-    # split train test set
-    with st.spinner(f'Training {round(df.shape[0]*training)} data'):
-        x_train, x_test, y_train, y_test = train_test_split(df[features], 
-                                                            df[target], 
-                                                            train_size=training, 
-                                                            random_state=1)
-    
-    if 'Random Forest' in options:
-        with st.spinner('Model development in progress'):
-            tree = RandomForestClassifier(random_state=1)
-            model = automl(tree, x_train, x_test, y_train, y_test)
-            download_pred_df(df, features, target, model)
-    if 'XGBoost' in options:
-        with st.spinner('Model development in progress'):
-            xgb = XGBClassifier()
-            model = automl(xgb, x_train, x_test, y_train, y_test)
-            download_pred_df(df, features, target, model)
-    if 'CatBoost' in options:
-        with st.spinner('Model development in progress'):
-            cat = CatBoostClassifier(random_seed=1, verbose=0)
-            model = automl(cat, x_train, x_test, y_train, y_test)
-            download_pred_df(df, features, target, model)
-    if 'LightGBM' in options:
-        with st.spinner('Model development in progress'):
-            lgb = LGBMClassifier()
-            model = automl(lgb, x_train, x_test, y_train, y_test)
-            download_pred_df(df, features, target, model)
-    if 'Logistic Regression' in options:
-        with st.spinner('Model development in progress'):
-            logit = LogisticRegression(random_state=1)
-            model = automl(logit, x_train, x_test, y_train, y_test)
-            download_pred_df(df, features, target, model)
+    if model_processing_:
+        if len(options) == 0:
+            st.error('No model is selected')
+            st.stop()
+
+        st.subheader('Data Modeling')
+        # split train test set
+        with st.spinner(f'Training {round(df.shape[0]*training)} data'):
+            x_train, x_test, y_train, y_test = train_test_split(df[features], 
+                                                                df[target], 
+                                                                train_size=training, 
+                                                                random_state=1)
+        
+        if 'Random Forest' in options:
+            with st.spinner('Model development in progress'):
+                tree = RandomForestClassifier(random_state=1)
+                model = automl(tree, x_train, x_test, y_train, y_test)
+                download_pred_df(df, features, target, model)
+        if 'XGBoost' in options:
+            with st.spinner('Model development in progress'):
+                xgb = XGBClassifier()
+                model = automl(xgb, x_train, x_test, y_train, y_test)
+                download_pred_df(df, features, target, model)
+        if 'CatBoost' in options:
+            with st.spinner('Model development in progress'):
+                cat = CatBoostClassifier(random_seed=1, verbose=0)
+                model = automl(cat, x_train, x_test, y_train, y_test)
+                download_pred_df(df, features, target, model)
+        if 'LightGBM' in options:
+            with st.spinner('Model development in progress'):
+                lgb = LGBMClassifier()
+                model = automl(lgb, x_train, x_test, y_train, y_test)
+                download_pred_df(df, features, target, model)
+        if 'Logistic Regression' in options:
+            with st.spinner('Model development in progress'):
+                logit = LogisticRegression(random_state=1)
+                model = automl(logit, x_train, x_test, y_train, y_test)
+                download_pred_df(df, features, target, model)
 
 
 # fig, ax = plt.subplots(figsize=(4,4))
