@@ -39,15 +39,10 @@ def main():
                 """, unsafe_allow_html=True)
     
     # count page views
-    # pageviews=Pageviews()
-    # pageviews.append('dummy')
+    if 'view' not in st.session_state:
+        st.session_state.view = 1
+    else:
+        st.session_state.view += 1
     
-    # try:
-    #     view = '<p style="text-align: right; font-size: 8px;">Total page viewed = {} times.</p>'.format(len(pageviews))
-    # except ValueError:
-    #     view = '<p style="text-align: right; font-size: 8px;">Page viewed = {} times</p>.'.format(1)
-    
-    # st.write(view, unsafe_allow_html=True)
-    # st.markdown("""You may aware that some of the functions are locked. 
-    #             If you are interested on it, please contact Kayden for the information""")
+    st.markdown(f'Total view: {st.session_status.view}')
     
