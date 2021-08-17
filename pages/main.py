@@ -39,10 +39,11 @@ def main():
                 """, unsafe_allow_html=True)
     
     # count page views
-    if 'view' not in st.session_state:
-        st.session_state.view = 1
-    else:
-        st.session_state.view += 1
+    # if 'view' not in st.session_state:
+    #     st.session_state.view = 1
+    # else:
+    #     st.session_state.view += 1
+    st.session_state.view = 'someone visit'
     
-    st.markdown(f'*Total view: {st.session_state.view}*')
+    print(f'Total view: {st.session_state.view}')
     
