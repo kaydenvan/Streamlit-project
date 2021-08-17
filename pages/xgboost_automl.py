@@ -108,6 +108,7 @@ def _plot_performance_matrix(model_result):
 
 def auto_xgboost():
     # main
+    # remove beta after online streamlit version updated
     st.title('XGBoosting')
     st.write('This app is powered by Streamlit, Sklearn.')
     st.write("""Working on Hyperparameters tuning would not fit to the model directly 
@@ -227,7 +228,7 @@ def auto_xgboost():
         st.session_state.params = params
         st.write(st.session_state.params)
     
-    col1, col2 = st.beta_columns((1,3))
+    col1, col2 = st.beta_columns((1,2))
     model_start_ = col1.button('Confirm training', 
                              help='Please confirm the target variable in sidebar before training')
     show_hyparameters_ = col2.checkbox('Show model hyper-parameters')
