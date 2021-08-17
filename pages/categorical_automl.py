@@ -206,10 +206,3 @@ def categorical_automl():
                 model = automl(logit, x_train, x_test, y_train, y_test)
                 st.write(plot_confusion_matrix_(model, x_test, y_test))
                 download_pred_df(df, features, target, model)
-
-
-# fig, ax = plt.subplots(figsize=(4,4))
-# plot_confusion_matrix(model, x_test, y_test, display_labels=model.classes_,
-#                      normalize='true', cmap=plt.cm.Blues, ax=ax)
-# plt.title('Normalized Confusion Matrix')
-# st.pyplot(fig)
