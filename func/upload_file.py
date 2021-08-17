@@ -11,7 +11,8 @@ import streamlit as st
 def upload_file(**kwargs):
     file_type = kwargs.get('file_type', ['csv', 'xlsx', 'xls'])
     file_info = kwargs.get('show_file_info', True)
-    uploaded_file = st.file_uploader('Please upload your dataset', type=file_type)
+    file_key = kwargs.get('key', 'upload_file')
+    uploaded_file = st.file_uploader('Please upload your dataset', type=file_type, key=file_key)
     if uploaded_file is not None:
         upload_status = True
         if file_info:

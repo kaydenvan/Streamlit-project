@@ -8,6 +8,10 @@ import streamlit as st
 
 def update():
     st.markdown("""
+                *17th Aug 2021*\n
+                1. Add XGBoosting detail function
+                """)
+    st.markdown("""
                 *15th Aug 2021*\n
                 1. Add demo function in auto clustering
                 """)

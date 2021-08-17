@@ -11,6 +11,7 @@ from pages.timeseries_automl import stock_automl
 from pages.exploratory_data_analysis import exploratory_data_analysis
 from pages.categorical_automl import categorical_automl
 from pages.auto_clustering import auto_clustering
+from pages.xgboost_automl import auto_xgboost
 from pages.version import update
 
 st.set_page_config(
@@ -37,6 +38,7 @@ app.add_page('1. Exploratory Data Analysis', exploratory_data_analysis)
 app.add_page('2. Categorical AutoML', categorical_automl)
 app.add_page('3. Stock AutoML', stock_automl)
 app.add_page('4. Auto Clustering', auto_clustering)
+app.add_page('Beta: XGBoost', auto_xgboost)
 app.add_page('Reference: version', update)
 
 # init instance
