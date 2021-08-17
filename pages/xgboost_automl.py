@@ -118,7 +118,7 @@ def auto_xgboost():
     if not uploaded:
         st.stop()
     
-    show_upload = st.expander('Preview uploaded dataset', expanded=True)
+    show_upload = st.beta_expander('Preview uploaded dataset', expanded=True)
     show_upload.write(df.head(50))
     
     # select target column
@@ -153,7 +153,7 @@ def auto_xgboost():
     # retrieve all cols
     df = pd.concat([df[numeric_cols], df[y_], onehot_df], axis=1)
     
-    show_transform = st.expander('Preview transformed dataset', expanded=False)
+    show_transform = st.beta_expander('Preview transformed dataset', expanded=False)
     show_transform.write(df.head(50))
     
     # data modeling
@@ -163,7 +163,7 @@ def auto_xgboost():
     x_train, x_valid, y_train, y_valid = train_test_split(df[x_], df[y_], train_size=.7, random_state=0)
     
     # tune model
-    hyper = st.sidebar.expander("Hyperparameters Tuning")
+    hyper = st.sidebar.beta_expander("Hyperparameters Tuning")
     objective_method_ = hyper.selectbox('Objective',
                                      ['reg:linear', 'reg:logistic','binary:logistic',
                                       'binary:logitraw', 'count:poisson', 'multi:softmax',
@@ -227,7 +227,7 @@ def auto_xgboost():
         st.session_state.params = params
         st.write(st.session_state.params)
     
-    col1, col2 = st.columns((1,3))
+    col1, col2 = st.beta_columns((1,3))
     model_start_ = col1.button('Confirm training', 
                              help='Please confirm the target variable in sidebar before training')
     show_hyparameters_ = col2.checkbox('Show model hyper-parameters')
@@ -262,7 +262,7 @@ def auto_xgboost():
         st.write(model.get_xgb_params())
     
     st.subheader('Visualization')
-    col3, col4 = st.columns(2)
+    col3, col4 = st.beta_columns(2)
     # performance metrics
     if col3.checkbox('Performance metrics'):
         model_result = model.evals_result()
@@ -294,7 +294,7 @@ def auto_xgboost():
     df['y_pred'] = label.inverse_transform(df['y_pred'])
     
     # Download
-    show_result = st.expander('Result dataframe', expanded=False)
+    show_result = st.beta_expander('Result dataframe', expanded=False)
     show_result.dataframe(df[[y_, 'y_pred'] + numeric_cols + object_cols].head(50))
     
     st.subheader('Download result and model')
@@ -314,7 +314,7 @@ def auto_xgboost():
     if not uploaded_test:
         st.stop()
         
-    show_uploaded_test = st.expander('Preview uploaded dataset', expanded=True)
+    show_uploaded_test = st.beta_expander('Preview uploaded dataset', expanded=True)
     show_uploaded_test.write(df_test.head(50))
     
     if y_ in df_test.columns.to_list():
@@ -346,7 +346,7 @@ def auto_xgboost():
     # retrieve all cols
     df_test = pd.concat([df_test[numeric_cols_test], df_test[y_], onehot_df_test], axis=1)
     
-    show_transform_test = st.expander('Preview transformed dataset', expanded=False)
+    show_transform_test = st.beta_expander('Preview transformed dataset', expanded=False)
     show_transform_test.write(df_test.head(50))
     
     # predict
@@ -364,7 +364,7 @@ def auto_xgboost():
     df_test['y_pred'] = label.inverse_transform(df_test['y_pred'])
     
     # Download
-    show_result_test = st.expander('Result dataframe', expanded=False)
+    show_result_test = st.beta_expander('Result dataframe', expanded=False)
     show_result_test.dataframe(df_test[[y_, 'y_pred'] + numeric_cols_test + object_cols_test].head(50))
     
     st.subheader('Download result')
