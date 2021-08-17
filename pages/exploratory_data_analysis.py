@@ -92,7 +92,7 @@ def exploratory_data_analysis():
     if df.empty:
         st.stop()
     
-    show_upload = st.beta_expander('Preview uploaded dataframe', expanded=True) if uploaded else st.expander('Preview demo dataframe', expanded=True)
+    show_upload = st.beta_expander('Preview uploaded dataframe', expanded=True) if uploaded else st.beta_expander('Preview demo dataframe', expanded=True)
     show_upload.dataframe(df.head(50))
             
     rows, cols_no = df.shape[0], df.shape[1]

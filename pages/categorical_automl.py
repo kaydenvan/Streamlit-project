@@ -155,10 +155,9 @@ def categorical_automl():
     show_transform.write('For the purpose of data modeling, the dataset will be transformed accordingly')
     show_transform.write(df.head(50))
     
-    options = st.sidebar.multiselect('Which models do you want to create?', 
+    options = st.sidebar.multiselect('Which model(s) do you want to create?', 
                              ['Random Forest', 'XGBoost', 'CatBoost', 'LightGBM', 'Logistic Regression'],
-                             default=['XGBoost'],
-                             help='By default, the program will develop a XGBoost model as it is in general with high accuracy. You can choose more for comparison.')\
+                             default=['Random Forest', 'XGBoost'])\
         if demo == 'No' else ['Random Forest', 'XGBoost', 'CatBoost', 'LightGBM', 'Logistic Regression']
     
     model_processing_ = st.sidebar.button('Confirm') if demo == 'No' else True 

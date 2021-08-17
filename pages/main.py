@@ -32,10 +32,11 @@ def main():
                 1. Exploratory Data Analysis<br>
                 2. Categorical Prediction (Auto)<br>
                 3. Stock Time Series Prediction (Auto)<br>
-                4. Customer Segmentation (Auto)<br>
+                4. Customer Segmentation (Auto) (TBA: plat feature importance) <br>
                 5. XGBoost classification model with detail analysis (Beta)<br>
-                6. Sentiment Analysis (Not Yet Developed)<br>
-                7. Image Classification (Not Yet Developed)<br>
+                6. Regression models (Not Yet Developed)<br>
+                7. Sentiment Analysis (Not Yet Developed)<br>
+                8. Image Classification (Not Yet Developed)<br>
                 """, unsafe_allow_html=True)
     
     # count page views

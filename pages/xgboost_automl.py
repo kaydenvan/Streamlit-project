@@ -245,15 +245,14 @@ def auto_xgboost():
     # st.session_state.model = True if 'model' not in st.session_state else st.session_state.model # True for empty model
         
     if model_start_ :
-        if 'params' not in st.session_state:
-            st.session_state.params = {}
-        model.set_params(**st.session_state.params)  
-        evalset = [(x_train, y_train), (x_valid, y_valid)]
-        model.fit(x_train, y_train, eval_set=evalset)
-        st.session_state.model = model
-        st.success('Model Completed!')
-        # elif (not model_start_) and (st.session_state.model == True): 
-    #     st.stop()
+        with st.spinner('Training in progress'):
+            if 'params' not in st.session_state:
+                st.session_state.params = {}
+            model.set_params(**st.session_state.params)  
+            evalset = [(x_train, y_train), (x_valid, y_valid)]
+            model.fit(x_train, y_train, eval_set=evalset)
+            st.session_state.model = model
+            st.success('Model Completed!')
         
     if 'model' not in st.session_state:
         st.stop()
@@ -287,14 +286,14 @@ def auto_xgboost():
         plot_importance(model, ax=ax, max_num_features=10)
         col4.write(fig)
     
-    # plot 4 trees to reduce computational resource required
-    if st.checkbox('Show tree', help='it will take quite a while to plot the decision tree'):
-        with st.spinner('plotting tree'):
-            fig, ax = plt.subplots(figsize=(30, 30))
-            plot_tree(model, ax=ax,
-                      # num_trees=4,
-                      )
-            st.write(fig)
+    # # disable the function now since streamlit does not support graphviz
+    # if st.checkbox('Show tree', help='it will take quite a while to plot the decision tree'):
+    #     with st.spinner('plotting tree'):
+    #         fig, ax = plt.subplots(figsize=(30, 30))
+    #         plot_tree(model, ax=ax,
+    #                   # num_trees=4,
+    #                   )
+    #         st.write(fig)
     
     # predict for existing dataset
     df['y_pred'] = model.predict(df[x_])
