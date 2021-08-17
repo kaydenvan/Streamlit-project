@@ -43,7 +43,6 @@ def main():
     #     st.session_state.view = 1
     # else:
     #     st.session_state.view += 1
-    st.session_state.view = 'someone visit'
     
-    print(f'Total view: {st.session_state.view}')
+    # st.write(f'Total view: {st.session_state.view}')
     
