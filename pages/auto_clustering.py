@@ -171,7 +171,8 @@ def auto_clustering():
     st.write('This app is powered by Streamlit, Sklearn.')
     df = pd.DataFrame()
     
-    df, uploaded = upload_file(file_type = ['csv', 'xlsx', 'xls'], show_file_info = False)
+    df, uploaded, file_name = upload_file(file_type = ['csv', 'xlsx', 'xls'], return_file_name = True)
+        
     if not uploaded:
         demo = st.sidebar.radio('Enable Demo', ('Yes', 'No'), index=1,
                                 help='Iris dataset is used for demonstration purpose')
@@ -180,12 +181,21 @@ def auto_clustering():
             df.drop(columns = 'target', inplace=True)
     else:
         demo = 'No'
+        
+    # check if the uploaded file refreshed or not
+    # if the file refreshed, clean the model created before
+    if 'file_name' not in st.session_state:
+        st.session_state.file_name = file_name
+    elif st.session_state.file_name != file_name:
+        if 'model' in st.session_state:
+            del st.session_state.model
+        st.session_state.file_name = file_name
     
     # if dataframe is empty, stop program
     if df.empty:
         st.stop()
         
-    show_upload = st.beta_expander('Preview uploaded dataframe', expanded=True) if uploaded else st.expander('Preview demo dataframe', expanded=True)
+    show_upload = st.beta_expander('Preview uploaded dataframe', expanded=True) if uploaded else st.beta_expander('Preview demo dataframe', expanded=True)
     show_upload.dataframe(df.head(50))
 
     # data cleaning for KMeans
@@ -209,9 +219,9 @@ def auto_clustering():
     # Layout
     # create sidebar expander
     if model_option_ == 'KMeans':
-        model_selection_ = st.sidebar.expander('KMeans Configuration', expanded=False)  
+        model_selection_ = st.sidebar.beta_expander('KMeans Configuration', expanded=False)  
     elif model_option_ == 'DBSCAN':
-        model_selection_ = st.sidebar.expander('DBSCAN Configuration', expanded=False)  
+        model_selection_ = st.sidebar.beta_expander('DBSCAN Configuration', expanded=False)  
 
     # Layout
     pca_ = model_selection_.checkbox('Enable PCA', help='Use PCA (1) to analysis and (2) transform and reduce dimension')

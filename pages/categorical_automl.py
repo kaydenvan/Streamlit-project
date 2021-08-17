@@ -7,6 +7,7 @@ Created on Mon Jul 26 09:21:34 2021
 import streamlit as st
 import pandas as pd
 import numpy as np 
+import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.preprocessing import OrdinalEncoder, LabelEncoder, MinMaxScaler
 from sklearn.impute import SimpleImputer
@@ -16,8 +17,7 @@ from xgboost import XGBClassifier
 from catboost import CatBoostClassifier
 from lightgbm import LGBMClassifier
 from sklearn.metrics import accuracy_score, recall_score, precision_score
-from sklearn.metrics import classification_report\
-    # , plot_confusion_matrix
+from sklearn.metrics import classification_report, plot_confusion_matrix
 from func.download_file import download_file
 from func.upload_file import upload_file
 import warnings
@@ -69,11 +69,18 @@ def download_pred_df(df, features, target, model):
     show_result.dataframe(df.head(50))
     # download_file(df)
 
+def plot_confusion_matrix_(model, x_test, y_test):
+    fig, ax = plt.subplots(figsize=(4,4))
+    plot_confusion_matrix(model, x_test, y_test, display_labels=model.classes_,
+                          normalize='true', cmap=plt.cm.Blues, ax=ax)
+    plt.title('Normalized Confusion Matrix')
+    return fig
+
 def categorical_automl():
     # main
     st.title('Auto Categorical ML')
     st.write('This app is powered by Streamlit, Sklearn, XGBoost, CatBoost and LightGBM')
-    df, uploaded = upload_file(file_type = ['csv', 'xlsx', 'xls'], show_file_info = False)
+    df, uploaded, file_name = upload_file(file_type = ['csv', 'xlsx', 'xls'], return_file_name = True)
     if not uploaded:
         demo = st.sidebar.radio('Enable Demo', ('Yes', 'No'), index=1,
                                 help='Iris dataset is used for demonstration purpose')
@@ -82,10 +89,19 @@ def categorical_automl():
     else:
         demo = 'No'
     
+    # check if the uploaded file refreshed or not
+    # if the file refreshed, clean the model created before
+    if 'file_name' not in st.session_state:
+        st.session_state.file_name = file_name
+    elif st.session_state.file_name != file_name:
+        if 'df' in st.session_state:
+            del st.session_state.df
+        st.session_state.file_name = file_name
+    
     if df.empty:
         st.stop()    
     
-    show_uploaded = st.beta_expander('Preview uploaded dataframe', expanded=True) if uploaded else st.expander('Preview demo dataframe', expanded=True)
+    show_uploaded = st.beta_expander('Preview uploaded dataframe', expanded=True) if uploaded else st.beta_expander('Preview demo dataframe', expanded=True)
     show_uploaded.dataframe(df.head())
     st.markdown('*If you would like to do EDA for the dataset, please reach to the EDA page accordingly*')
     
@@ -164,26 +180,31 @@ def categorical_automl():
             with st.spinner('Model development in progress'):
                 tree = RandomForestClassifier(random_state=1)
                 model = automl(tree, x_train, x_test, y_train, y_test)
+                st.write(plot_confusion_matrix_(model, x_test, y_test))
                 download_pred_df(df, features, target, model)
         if 'XGBoost' in options:
             with st.spinner('Model development in progress'):
                 xgb = XGBClassifier()
                 model = automl(xgb, x_train, x_test, y_train, y_test)
+                st.write(plot_confusion_matrix_(model, x_test, y_test))
                 download_pred_df(df, features, target, model)
         if 'CatBoost' in options:
             with st.spinner('Model development in progress'):
                 cat = CatBoostClassifier(random_seed=1, verbose=0)
                 model = automl(cat, x_train, x_test, y_train, y_test)
+                st.write(plot_confusion_matrix_(model, x_test, y_test))
                 download_pred_df(df, features, target, model)
         if 'LightGBM' in options:
             with st.spinner('Model development in progress'):
                 lgb = LGBMClassifier()
                 model = automl(lgb, x_train, x_test, y_train, y_test)
+                st.write(plot_confusion_matrix_(model, x_test, y_test))
                 download_pred_df(df, features, target, model)
         if 'Logistic Regression' in options:
             with st.spinner('Model development in progress'):
                 logit = LogisticRegression(random_state=1)
                 model = automl(logit, x_train, x_test, y_train, y_test)
+                st.write(plot_confusion_matrix_(model, x_test, y_test))
                 download_pred_df(df, features, target, model)
 
 

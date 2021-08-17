@@ -114,10 +114,19 @@ def auto_xgboost():
     st.write("""Working on Hyperparameters tuning would not fit to the model directly 
              unless user clicks the confirm button. It will take awhile for hyperparameters tuning.
              Please stay tuned while it is loading.""")
-    df, uploaded = upload_file(file_type = ['csv', 'xlsx', 'xls'], show_file_info = False, key='train')
+    df, uploaded, file_name = upload_file(file_type = ['csv', 'xlsx', 'xls'], return_file_name = True, key='train')
     
     if not uploaded:
         st.stop()
+        
+    # check if the uploaded file refreshed or not
+    # if the file refreshed, clean the model created before
+    if 'file_name' not in st.session_state:
+        st.session_state.file_name = file_name
+    elif st.session_state.file_name != file_name:
+        if 'model' in st.session_state:
+            del st.session_state.model
+        st.session_state.file_name = file_name
     
     show_upload = st.beta_expander('Preview uploaded dataset', expanded=True)
     show_upload.write(df.head(50))
@@ -233,8 +242,8 @@ def auto_xgboost():
                              help='Please confirm the target variable in sidebar before training')
     show_hyparameters_ = col2.checkbox('Show model hyper-parameters')
     
-    st.session_state.model = True if 'model' not in st.session_state else st.session_state.model # True for empty model
-    
+    # st.session_state.model = True if 'model' not in st.session_state else st.session_state.model # True for empty model
+        
     if model_start_ :
         if 'params' not in st.session_state:
             st.session_state.params = {}
@@ -243,9 +252,12 @@ def auto_xgboost():
         model.fit(x_train, y_train, eval_set=evalset)
         st.session_state.model = model
         st.success('Model Completed!')
-    elif (not model_start_) and (st.session_state.model == True): 
+        # elif (not model_start_) and (st.session_state.model == True): 
+    #     st.stop()
+        
+    if 'model' not in st.session_state:
         st.stop()
-    
+
     # retrieve model information for last trained
     model = st.session_state.model
     
