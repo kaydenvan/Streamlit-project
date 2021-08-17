@@ -44,5 +44,5 @@ def main():
     else:
         st.session_state.view += 1
     
-    st.markdown(f'Total view: {st.session_status.view}')
+    st.markdown(f'*Total view: {st.session_state.view}*')
     
