@@ -45,7 +45,7 @@ def stock_automl():
     demo = st.sidebar.radio('Enable Demo', ('Yes', 'No'), index=1, 
                             help='AAPL will be used as the demo and by default 5-year records used')
     
-    col1, col2 = st.columns(2)
+    col1, col2 = st.beta_columns(2)
     with col1:
         stock_symbol = st.text_input('Please input stock symbol', '').strip() if demo == 'No' else 'AAPL'
     

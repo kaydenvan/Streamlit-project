@@ -7,9 +7,12 @@ Created on Mon Aug  2 21:26:14 2021
 import streamlit as st
 
 def update():
+    st.title('Version update record')
+    st.write('This page records all the update history for this app.')
     st.markdown("""
                 *17th Aug 2021*\n
                 1. Add XGBoosting detail function
+                2. Roll back for beta_columns and beta_expander since streamlit online version is outdated
                 """)
     st.markdown("""
                 *15th Aug 2021*\n
