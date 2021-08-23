@@ -106,7 +106,7 @@ def _plot_performance_matrix(model_result):
     return fig
 
 
-def auto_xgboost():
+def auto_xgboost_classification():
     # main
     # remove beta after online streamlit version updated
     st.title('XGBoosting')
