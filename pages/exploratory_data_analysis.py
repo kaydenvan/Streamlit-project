@@ -136,7 +136,7 @@ def exploratory_data_analysis():
             _univariate_numeric(df, col, bucket=show_plot_cols)
 
     show_corr = st.beta_expander('Data Correlation', expanded=False)\
-        if demo == 'No' else st.expander('Data Correlation', expanded=True)
+        if demo == 'No' else st.beta_expander('Data Correlation', expanded=True)
 
     # show data correlation
     corr_factor = .7
