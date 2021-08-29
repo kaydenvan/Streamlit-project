@@ -10,6 +10,10 @@ def update():
     st.title('Version update record')
     st.write('This page records all the update history for this app.')
     st.markdown("""
+                *29th Aug 2021*\n
+                1. Update demo function in auto clustering page
+                """)
+    st.markdown("""
                 *23rd Aug 2021*\n
                 1. Add regression page
                 2. include pipeline transformation in regression page

@@ -5,6 +5,8 @@ Created on Tue Jul 27 19:04:58 2021
 @author: van_s
 """
 
+# yet to finalize the demo
+
 import pandas as pd
 import streamlit as st
 import numpy as np 
@@ -214,7 +216,7 @@ def auto_clustering():
     model_option_ = st.sidebar.selectbox('Choose the methodology to cluster the data', 
                                         ('KMeans', 'DBSCAN'), index=0,
                                         help='Select clustering method')
-    train_model_ = st.sidebar.button('Confirm', help='Confirm model to train')
+    train_model_ = st.sidebar.button('Confirm', help='Confirm model to train') if demo == 'No' else True
     
     # Layout
     # create sidebar expander
@@ -224,7 +226,9 @@ def auto_clustering():
         model_selection_ = st.sidebar.beta_expander('DBSCAN Configuration', expanded=False)  
 
     # Layout
-    pca_ = model_selection_.checkbox('Enable PCA', help='Use PCA (1) to analysis and (2) transform and reduce dimension')
+    pca_ = model_selection_.checkbox('Enable PCA', help='Use PCA (1) to analysis and (2) transform and reduce dimension')\
+        if demo == 'No' else True
+            
     if model_option_ == 'KMeans':
         elbow_ = model_selection_.checkbox('Elbow Method', 
                                            help='Check it if you want to show Elbow Chart') if demo == 'No' else True
@@ -244,7 +248,8 @@ def auto_clustering():
         # can add slider to ask what % variance has to be covered
         optimal_feature, df_pca = get_optimal_features(df, plot_pca=True, ratio=ratio_, df_pca=True)
         st.write(f'{optimal_feature} feature(s) is/are used for clustering. It can cover {ratio_*100}% of original features')
-        show_transform = st.beta_expander('Preview transformed dataset', expanded=False)
+        show_transform = st.beta_expander('Preview transformed dataset', expanded=False) \
+            if demo == 'No' else st.beta_expander('Preview transformed dataset', expanded=True) 
         show_transform.write(df.head(50))
     
     if not df_pca.empty:
@@ -285,17 +290,17 @@ def auto_clustering():
     if model_option_ == 'KMeans':
         # plot Elbow Method
         col1, col2 = st.beta_columns(2)
-        if elbow_:
+        if elbow_ or demo == 'Yes':
             col1.write('Elbow Method Graph')
             col1.write(plot_elbow(clusters, st.session_state.sse))
         
         # plot Silhouette Coefficient
-        if silouette_score_:
+        if silouette_score_ or demo == 'Yes':
             col2.write('Silhouette Score Graph')
             col2.write(plot_silhouette_score(clusters, st.session_state.sil))
     
         # plot interactive clustering chart
-        if plot_cluster_correlation_:
+        if plot_cluster_correlation_ or demo == 'Yes':
             col3, col4 = st.beta_columns(2)
             plot_cols_x = st.session_state.df.columns.to_list()
             plot_cols_x.remove('y_pred')
