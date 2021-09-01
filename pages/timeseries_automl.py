@@ -130,7 +130,7 @@ def stock_automl():
     # optional graph
     optionals = st.beta_expander("Optional Functions", False) if demo == 'No' else st.beta_expander("Optional Functions", True)
     optionals.markdown('**Prediction dataframe**')
-    optionals.dataframe(forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(predict_days))
+    optionals.dataframe(forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(max_predict_day))
     optionals.markdown('**Model components**')
     fig = model.plot_components(forecast[:-(max_predict_day-predict_days)])
     optionals.write(fig)
