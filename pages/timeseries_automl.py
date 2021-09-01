@@ -132,7 +132,7 @@ def stock_automl():
     optionals.markdown('**Prediction dataframe**')
     optionals.dataframe(forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(max_predict_day))
     optionals.markdown('**Model components**')
-    fig = model.plot_components(forecast[:-(max_predict_day-predict_days)])
+    fig = model.plot_components(forecast[-180:])
     optionals.write(fig)
 
 
