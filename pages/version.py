@@ -10,7 +10,7 @@ def update():
     st.title('Version update record')
     st.write('This page records all the update history for this app.')
     st.markdown("""
-                *1st Aug 2021*\n
+                *1st Sep 2021*\n
                 1. Bug fixed
                 """)
     st.markdown("""
