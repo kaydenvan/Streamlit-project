@@ -10,6 +10,10 @@ def update():
     st.title('Version update record')
     st.write('This page records all the update history for this app.')
     st.markdown("""
+                *1st Aug 2021*\n
+                1. Bug fixed
+                """)
+    st.markdown("""
                 *29th Aug 2021*\n
                 1. Update demo function in auto clustering page
                 """)

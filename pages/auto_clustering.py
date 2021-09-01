@@ -171,6 +171,7 @@ def download_pred_df(df):
 def auto_clustering():
     st.title('Auto Clustering')
     st.write('This app is powered by Streamlit, Sklearn.')
+    st.write('There will be more available functions if you are uploading the dataset and configurate it yourself.')
     df = pd.DataFrame()
     
     df, uploaded, file_name = upload_file(file_type = ['csv', 'xlsx', 'xls'], return_file_name = True)
