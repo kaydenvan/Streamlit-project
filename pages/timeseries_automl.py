@@ -125,7 +125,7 @@ def stock_automl():
                     unsafe_allow_html=True)
         
     # optional graph
-    optionals = st.expander("Optional Functions", False) if demo == 'No' else st.beta_expander("Optional Functions", True)
+    optionals = st.beta_expander("Optional Functions", False) if demo == 'No' else st.beta_expander("Optional Functions", True)
     optionals.markdown('**Prediction dataframe**')
     optionals.dataframe(forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(predict_days))
     optionals.markdown('**Model components**')
