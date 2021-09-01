@@ -110,7 +110,10 @@ def stock_automl():
         
         # plot graph
         fig, ax = plt.subplots()
-        forecast_plot_df = forecast.set_index('ds')[['yhat']][-(60+max_predict_day-predict_days):-(max_predict_day-predict_days)]
+        if max_predict_day != predict_days:
+            forecast_plot_df = forecast.set_index('ds')[['yhat']][-(60+max_predict_day-predict_days):-(max_predict_day-predict_days)]
+        else:
+            forecast_plot_df = forecast.set_index('ds')[['yhat']][-(60+max_predict_day-predict_days):]
         actual_plot_df = df.set_index('Date')[['Close']][(df[df['Date'] == min(forecast_plot_df.index)].index.values[0]):]
         ax.plot(forecast_plot_df, color='r', label='forecast')
         ax.plot(actual_plot_df, color='g', label='actual')
